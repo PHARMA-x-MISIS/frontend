@@ -104,7 +104,7 @@ export default function RegisterStep4Screen() {
           className="flex-1"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 20 }}>
-          <View className="flex-row flex-wrap gap-1.5 justify-center">
+          <View className="flex-row flex-wrap gap-2 justify-center">
             {filteredCompetencies.map(comp => {
               const isSelected = selectedCompetencies.includes(comp.id);
               return (
@@ -114,7 +114,7 @@ export default function RegisterStep4Screen() {
                   activeOpacity={1}
                   className={`rounded-full border ${
                     isSelected 
-                      ? `border-transparent` 
+                      ? `border-black` 
                       : 'border-black bg-white'
                   }`}>
                   {isSelected ? (
@@ -125,13 +125,13 @@ export default function RegisterStep4Screen() {
                       comp.color === 'green' ? 'bg-[#00C587]' :
                       'bg-[#79FF9F]'
                     }`}>
-                      <Text className="font-onest-semibold text-[18px] text-black">
+                      <Text className="text-[15px] text-black">
                         {comp.name}
                       </Text>
                     </View>
                   ) : (
                     <View className="rounded-full px-2.5 py-1 bg-white">
-                      <Text className="font-onest-semibold text-[18px] text-black">
+                      <Text className="font-onest-semibold text-[15px] text-black">
                         {comp.name}
                       </Text>
                     </View>
