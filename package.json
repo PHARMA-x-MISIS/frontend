@@ -17,6 +17,7 @@
     "@expo/vector-icons": "^15.0.2",
     "@hookform/resolvers": "^5.2.2",
     "@react-native-masked-view/masked-view": "0.3.2",
+    "axios": "^1.12.2",
     "clsx": "^2.1.1",
     "expo": "^54.0.0",
     "expo-constants": "~18.0.9",
