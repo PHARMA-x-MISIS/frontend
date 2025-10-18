@@ -11,6 +11,7 @@ export default function MainLayout() {
       <Stack.Screen name="profile" />
       <Stack.Screen name="feed" />
       <Stack.Screen name="(community)" />
+      <Stack.Screen name="chat" />
     </Stack>
   );
 }
