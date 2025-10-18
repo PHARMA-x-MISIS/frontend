@@ -11,7 +11,29 @@ npm-debug.*
 web-build/
 
 
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
 
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+logs
+*.log
+*.lock
+
+/android/build/
+/android/app/build/
+/android/app/.cxx/
+/ios/build/
+/ios/Pods/
 
 ios
 android
