@@ -10,3 +10,5 @@ export { default as Plus } from './Plus'
 export { default as Profile } from './Profile'
 export { default as RightArrow } from './RightArrow'
 export { default as UilVk } from './UilVk'
+export * from './ProfileIcon';
+export * from './CommunityIcon';

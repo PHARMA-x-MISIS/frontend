@@ -1,7 +1,8 @@
 import axios from 'axios'; 
 import { RegistrationData } from '@/lib/contexts/RegistrationContext';
+import { LoginFormData } from '@/lib/validation/authSchemas';
 
-const apiClient = axios.create({
+export const apiClient = axios.create({
       baseURL: 'https://mosprom.misis-team.ru',
       headers: { 'Content-Type': 'application/json' },
      }); 
@@ -35,5 +36,17 @@ export const registerUser = async (userData: RegistrationData): Promise<any> => 
     return response.data;
   } catch (error) {
     throw new Error(handleApiError(error, { 400: 'Пользователь с такой почтой уже существует.' }));
+  }
+};
+
+export const loginUser = async (credentials: LoginFormData): Promise<{ access_token: string }> => {
+  try {
+    const response = await apiClient.post('/users/login', credentials);
+    return response.data;
+  } catch (error) {
+    throw new Error(handleApiError(error, {
+      401: 'Неверный email или пароль.',
+      404: 'Пользователь с таким email не найден.',
+    }));
   }
 };
