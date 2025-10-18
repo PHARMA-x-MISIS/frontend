@@ -7,6 +7,23 @@ export const apiClient = axios.create({
       headers: { 'Content-Type': 'application/json' },
      }); 
      
+export interface UserProfile {
+  email: string;
+  first_name: string;
+  last_name: string;
+  patronymic?: string;
+  description?: string;
+  contact?: string;
+  place_of_job?: string;
+  place_of_study?: string;
+  id: number;
+  created_at: string;
+  profile_photo?: string;
+  vk_avatar?: string;
+  skills: string[];
+  communities: string[];
+}
+
 
 const handleApiError = (error: any, customMessages: { [key: number]: string } = {}): string => {
   if (axios.isAxiosError(error) && error.response) {
@@ -48,5 +65,14 @@ export const loginUser = async (credentials: LoginFormData): Promise<{ access_to
       401: 'Неверный email или пароль.',
       404: 'Пользователь с таким email не найден.',
     }));
+  }
+};
+
+export const getCurrentUser = async (): Promise<UserProfile> => {
+  try {
+    const response = await apiClient.get('/users/me');
+    return response.data;
+  } catch (error) {
+    throw new Error(handleApiError(error));
   }
 };

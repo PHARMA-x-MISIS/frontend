@@ -13,9 +13,9 @@ export default function Index() {
       if (isAuthenticated) {
         router.replace('/(main)/profile');
       } else {
-        router.replace('/(auth)/register');
+        router.replace('/(auth)/login');
       }
-    }, 500);
+    }, 300);
   }, []);
 
   return (

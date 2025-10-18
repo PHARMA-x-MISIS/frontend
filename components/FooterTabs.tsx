@@ -4,7 +4,9 @@ import { View, Pressable } from 'react-native';
 import { Grid } from './icons';
 import { Notifications } from './icons';
 import { Profile } from './icons';
-type TabName = 'grid' | 'notifications' | 'profile';
+
+
+export type TabName = 'profile' | 'feed' | 'services';
 
 interface FooterTabsProps {
   activeTab: TabName;

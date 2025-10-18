@@ -84,8 +84,7 @@ export default function LoginScreen() {
               onChangeText={onChange}
               value={value}
               error={errors.password?.message}
-              secureTextEntry 
-              required={false}            />
+              secureTextEntry required={false}            />
           )}
         />
         <View className="mt-12 w-full gap-y-4 px-5">

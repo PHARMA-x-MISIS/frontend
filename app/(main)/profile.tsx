@@ -1,58 +1,120 @@
-import React, {useState} from 'react';
-import { View, StatusBar, ScrollView, Pressable, ViewStyle } from 'react-native';
+// app/(main)/profile.tsx
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  StatusBar, 
+  ScrollView, 
+  Pressable, 
+  ActivityIndicator, 
+  Alert, 
+  Text 
+} from 'react-native';
+import { router } from 'expo-router';
+// Ваши компоненты
 import UserInfo from 'components/UserInfo';
-import { LeftArrow } from 'components/icons';
-import { Edit } from 'components/icons';
 import CompetencyBlock from 'components/CompetencyBlock';
 import AboutUserBlock from 'components/AboutUserBlock';
 import CommunitiesBlock from 'components/CommunitiesBlock';
 import FooterTabs from 'components/FooterTabs';
-import LabeledInput from 'components/LabeledInput';
-import { router } from 'expo-router';
-
+// Ваши иконки
+import { LeftArrow, Edit } from 'components/icons';
+// Функции API и контекст
+import { getCurrentUser, UserProfile } from 'api/api';
+import { useAuth } from 'src/lib/contexts/AuthContext';
 
 const ProfileScreen = () => {
-    const [email, setEmail] = useState('');
+  const { signOut } = useAuth(); // Получаем функцию выхода из контекста
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Этот эффект запускается один раз при открытии экрана
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await getCurrentUser();
+        setUser(userData);
+      } catch (error) {
+        console.error("Profile fetch error:", error);
+        Alert.alert("Ошибка", "Не удалось загрузить данные профиля.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    fetchUserData();
+  }, []); // Пустой массив зависимостей означает "запустить при монтировании"
+
+  // Функция для выхода из аккаунта
+  const handleLogout = () => {
+    signOut();
+    // Перенаправление на экран логина произойдет автоматически
+    // благодаря логике в вашем app/_layout.tsx
+  };
+  
+  // --- Управление состояниями рендеринга ---
+
+  // 1. Пока данные загружаются, показываем индикатор загрузки
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#E94975" />
+      </View>
+    );
+  }
+
+  // 2. Если загрузка завершилась, но данных нет (ошибка), показываем сообщение
+  if (!user) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white p-5">
+        <Text className="font-onest-semibold text-lg text-center">Не удалось загрузить профиль</Text>
+        <Pressable onPress={handleLogout} className="mt-4">
+          <Text className="font-onest-medium text-blue-600">Вернуться на экран входа</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  // 3. Если все успешно, рендерим полный экран профиля
   return (
     <View className="flex-1 bg-white px-4 pt-4 mt-8">
       <StatusBar barStyle="dark-content" />
 
-      {/* Header */}
+      {/* --- Header --- */}
       <View className="h-14 flex-row items-center justify-between">
-        <Pressable onPress={() => router.push('/(auth)/login')}>
+        <Pressable onPress={handleLogout}>
           <LeftArrow width={28} height={28} color="black" />
         </Pressable>
-
-        <Pressable onPress={() => console.log('Edit')}>
+        <Text className="font-onest-semibold text-lg">Профиль</Text>
+        <Pressable onPress={() => console.log('Редактирование профиля')}>
           <Edit width={24} height={24} color="black" />
         </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* User Info */}
+        {/* --- User Info --- */}
         <UserInfo
-          avatarUrl={{ uri: 'https://globalmsk.ru/usr/person/big-person-15745201611.jpg' }}
-          firstName="Анатолий"
-          lastName="Константинопольский"
+          // Если есть фото профиля - показываем его, если нет - заглушку
+          avatarUrl={user.profile_photo ? { uri: user.profile_photo } : require('../../assets/images/avatar-placeholder.png')}
+          firstName={user.first_name}
+          lastName={user.last_name}
         />
 
-        <View className="flex-col gap-3">
-          <View className="mt-6">
-            <CompetencyBlock></CompetencyBlock>
-          </View>
+        <View className="flex-col gap-3 mt-6">
+          {/* --- Блок компетенций --- */}
+          <CompetencyBlock skills={user.skills} />
+          
+          {/* --- Блок "О себе" (показывается только если есть описание) --- */}
+          {user.description && (
+            <AboutUserBlock about={user.description} />
+          )}
 
-          <View>
-            <AboutUserBlock about="Привет меня зовут Паша я фронтендер на реакте люблю дез грипссссс"></AboutUserBlock>
-          </View>
-
-          <CommunitiesBlock />
+          {/* --- Блок сообществ --- */}
+          <CommunitiesBlock communities={user.communities} />
         </View>
-
-
       </ScrollView>
-      <FooterTabs activeTab="profile" />
+
+      {/* --- Нижняя панель навигации --- */}
+ 
     </View>
   );
 };
