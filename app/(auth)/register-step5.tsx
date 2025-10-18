@@ -16,24 +16,20 @@ import { useRegistration } from '../../src/lib/contexts/RegistrationContext';
 import { registerUser } from 'api/api';
 
 export default function RegisterStep5Screen() {
-  // --- Состояния компонента ---
-  const { data } = useRegistration(); // Данные со всех предыдущих шагов
-  const [avatarUri, setAvatarUri] = useState<string | null>(null); // URI выбранного аватара для отображения
-  const [isSubmitting, setIsSubmitting] = useState(false); // Флаг для отслеживания процесса отправки
-  const [showModal, setShowModal] = useState(false); // Флаг для отображения модального окна успеха
+  const { data } = useRegistration();
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [showModal, setShowModal] = useState(false);
 
-  /**
-   * Открывает галерею для выбора изображения, запрашивая разрешения.
-   */
+
+
   const pickImage = async () => {
-    // 1. Запрашиваем разрешение
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Требуется разрешение', 'Пожалуйста, предоставьте доступ к вашей галерее, чтобы выбрать фото.');
       return;
     }
 
-    // 2. Открываем галерею
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -41,25 +37,19 @@ export default function RegisterStep5Screen() {
       quality: 0.8,
     });
 
-    // 3. Сохраняем результат, если пользователь не отменил выбор
     if (!result.canceled) {
       setAvatarUri(result.assets[0].uri);
     }
   };
 
-  /**
-   * Собирает все данные и отправляет на сервер для регистрации.
-   * При успехе показывает модальное окно.
-   */
   const onSubmit = async () => {
     setIsSubmitting(true);
     
-    // Формируем финальный объект данных для отправки на сервер
     const finalData = {
       email: data.email!,
       first_name: data.first_name!,
       last_name: data.last_name!,
-      patronymic: "", // Можно добавить, если это поле собирается на предыдущих шагах
+      patronymic: "", 
       description: data.description || "",
       contact: data.contact || "",
       place_of_job: data.place_of_job || "",
@@ -69,36 +59,26 @@ export default function RegisterStep5Screen() {
     };
     
     try {
-      // Отправляем запрос
       await registerUser(finalData);
-      // Если запрос успешен, показываем модальное окно
       setShowModal(true);
     } catch (error) {
       console.error('Registration failed:', error);
       Alert.alert('Ошибка регистрации', (error as Error).message);
     } finally {
-      // В любом случае завершаем состояние отправки
       setIsSubmitting(false);
     }
   };
 
-  /**
-   * Обработчик для кнопки "Сообщества" в модальном окне.
-   */
   const handleRecommendations = () => {
     setShowModal(false);
-    router.replace('/(main)/recommendations'); // Используем replace, чтобы пользователь не мог вернуться назад
+    router.replace('/(main)/recommendations');
   };
 
-  /**
-   * Обработчик для кнопки "Профиль" в модальном окне.
-   */
   const handleProfile = () => {
     setShowModal(false);
-    router.replace('/(main)/profile'); // Используем replace
+    router.replace('/(main)/profile');
   };
 
-  // --- Рендеринг компонента ---
   return (
     <>
       <AuthLayout
@@ -110,7 +90,7 @@ export default function RegisterStep5Screen() {
             <Button
               title={isSubmitting ? "Регистрация..." : "Завершить"}
               onPress={onSubmit}
-              disabled={isSubmitting} // Блокируем кнопку во время отправки
+              disabled={isSubmitting}
             />
           </View>
         }>
