@@ -52,6 +52,7 @@ const ProfileScreen = () => {
 
               <LabeledInput
           label="Почта"
+          required={false}
           placeholder="Введите вашу почту"
           value={email} // Показываем то, что в переменной email
           onChangeText={setEmail} // Любое изменение записываем в переменную email
@@ -61,6 +62,7 @@ const ProfileScreen = () => {
 
                 <LabeledInput
           label="Почта"
+          required={false}
           placeholder="Введите вашу почту"
           value={email} // Показываем то, что в переменной email
           onChangeText={setEmail} // Любое изменение записываем в переменную email
