@@ -1,8 +1,39 @@
 import axios from 'axios'; 
+import { RegistrationData } from '@/lib/contexts/RegistrationContext';
+
 const apiClient = axios.create({
-     //baseURL: (process.env.REACT_APP_BACKEND_URL + '/api/v1') || 'http://localhost:8080/api/v1', 
-     // baseURL:'http://localhost:8080/api/v1', headers: { 'Content-Type': 'application/json' }, 
+      baseURL: 'https://mosprom.misis-team.ru',
+      headers: { 'Content-Type': 'application/json' },
      }); 
-const handleApiError = (error: any, customMessages: { [key: number]: string } = {}): string => { if (axios.isAxiosError(error) && error.response) { const status = error.response.status; const serverMessage = error.response.data?.message; if (customMessages[status]) return customMessages[status]; if (serverMessage) return `Ошибка ${status}: ${serverMessage}`; return `Произошла ошибка сервера (код: ${status})`; } else if (axios.isAxiosError(error)) { return 'Ошибка сети. Не удалось подключиться к серверу.'; } return 'Произошла непредвиденная ошибка.'; }; 
-export const registerUser = async ( email: string, first_name: string, last_name: string, patronymic: string = '', description: string, contact:string, place_of_job: string, place_of_study: string, password: string, skills: [] ): Promise<{ "email": "user@example.com", "first_name": "string", "last_name": "string", "patronymic": "", "description": "string", "contact": "string", "place_of_job": "string", "place_of_study": "string", "id": 0, "created_at": "2025-10-18T11:24:58.847Z", "profile_photo": "string", "vk_avatar": "string", "skills": [], "communities": [] }> => { try { const response = await apiClient.post('/users/register', { email, first_name, last_name, patronymic, description, contact, place_of_job, place_of_study, password, skills: [] }); return response.data; } catch (error) { throw new Error(handleApiError(error, { 404: 'Пользователь с таким табельным номером уже существует.' })); } }; 
-export const loginUser = async (employeeId: string): Promise<{ role: string }> => { try { const response = await apiClient.post('/user/login', { employee_id: employeeId }); return response.data; } catch (error) { throw new Error(handleApiError(error, { 401: 'Ошибка входа. Неверный табельный номер.' })); } };
+     
+
+const handleApiError = (error: any, customMessages: { [key: number]: string } = {}): string => {
+  if (axios.isAxiosError(error) && error.response) {
+    const status = error.response.status;
+    const serverMessage = error.response.data?.message;
+    if (customMessages[status]) return customMessages[status];
+    if (serverMessage) return `Ошибка ${status}: ${serverMessage}`;
+    return `Произошла ошибка сервера (код: ${status})`;
+  } else if (axios.isAxiosError(error)) {
+    return 'Ошибка сети. Не удалось подключиться к серверу.';
+  }
+  return 'Произошла непредвиденная ошибка.';
+};
+
+export const getSkills = async (): Promise<string[]> => {
+  try {
+    const response = await apiClient.get('/users/skills/all');
+    return response.data;
+  } catch (error) {
+    throw new Error(handleApiError(error));
+  }
+};
+
+export const registerUser = async (userData: RegistrationData): Promise<any> => {
+  try {
+    const response = await apiClient.post('/users/register', userData);
+    return response.data;
+  } catch (error) {
+    throw new Error(handleApiError(error, { 400: 'Пользователь с такой почтой уже существует.' }));
+  }
+};

@@ -1,6 +1,6 @@
 // app/(auth)/register-step3.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, NativeSyntheticEvent, TextInputContentSizeChangeEventData } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
@@ -8,8 +8,9 @@ import Button from 'components/Button';
 import AuthLayout from 'layouts/AuthLayout';
 import LabeledInput from 'components/LabeledInput';
 import { z } from 'zod';
+import { useRegistration } from '../../src/lib/contexts/RegistrationContext';
 
-
+// Схема валидации для третьего шага (все поля опциональны)
 const registrationStep3Schema = z.object({
   vkLink: z.string().optional(),
   studyPlace: z.string().optional(),
@@ -17,9 +18,13 @@ const registrationStep3Schema = z.object({
   aboutYou: z.string().optional(),
 });
 
+// Тип данных формы, выведенный из схемы
 type RegistrationStep3FormData = z.infer<typeof registrationStep3Schema>;
 
 export default function RegisterStep3Screen() {
+  // Получаем функцию для обновления данных из нашего контекста
+  const { updateData } = useRegistration();
+
   const {
     control,
     handleSubmit,
@@ -34,8 +39,16 @@ export default function RegisterStep3Screen() {
     },
   });
 
-  const onSubmit = async (data: RegistrationStep3FormData) => {
-    console.log('Данные третьего шага регистрации:', data);
+  // Функция, которая вызывается при нажатии на кнопку "Далее"
+  const onSubmit = (data: RegistrationStep3FormData) => {
+    // Сохраняем данные в контекст с ключами, которые ожидает API
+    updateData({
+      contact: data.vkLink,
+      place_of_study: data.studyPlace,
+      place_of_job: data.workPlace,
+      description: data.aboutYou,
+    });
+    // Переходим на следующий шаг
     router.push('/(auth)/register-step4');
   };
 
@@ -43,7 +56,15 @@ export default function RegisterStep3Screen() {
     <AuthLayout
       title="Регистрация"
       subtitle="Контактные данные"
-      showBackButton>
+      showBackButton
+      footer={
+        <View className="items-center">
+          <Text className="text-gray-600 font-onest-regular">Уже есть аккаунт?</Text>
+          <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
+            <Text className="mt-1 text-blue-600 font-onest-semibold">Войти</Text>
+          </TouchableOpacity>
+        </View>
+      }>
       <View className="gap-y-2">
         <Controller
           control={control}
@@ -69,7 +90,7 @@ export default function RegisterStep3Screen() {
           render={({ field: { onChange, onBlur, value } }) => (
             <LabeledInput
               label="Место учебы"
-              placeholder="Место учебы "
+              placeholder="Место учебы"
               onBlur={onBlur}
               required={false}
               onChangeText={onChange}
@@ -95,20 +116,20 @@ export default function RegisterStep3Screen() {
           )}
         />
 
-        
-        <Controller // поле динамической высоты, расширяется если текст не влезает
+        <Controller
           control={control}
           name="aboutYou"
           render={({ field: { onChange, onBlur, value } }) => {
+            // Эта логика отвечает за динамическое изменение высоты поля
             const MIN_HEIGHT = 100;
             const MAX_HEIGHT = 300;
             const [height, setHeight] = React.useState<number>(MIN_HEIGHT);
 
             const handleContentSizeChange = React.useCallback(
-              (e: any) => {
+              (e: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) => {
                 const newHeight = Math.ceil(e.nativeEvent.contentSize.height || 0);
-                const clamped = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, newHeight));
-                setHeight(clamped);
+                const clampedHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, newHeight));
+                setHeight(clampedHeight);
               },
               []
             );
@@ -124,14 +145,13 @@ export default function RegisterStep3Screen() {
                 multiline
                 required={false}
                 textAlignVertical="top"
-                style={{ minHeight: MIN_HEIGHT, height: Math.max(MIN_HEIGHT, height) }}
-                scrollEnabled={height > MAX_HEIGHT}
+                style={{ minHeight: MIN_HEIGHT, height: height }}
+                scrollEnabled={height >= MAX_HEIGHT}
                 onContentSizeChange={handleContentSizeChange}
               />
             );
           }}
         />
-
 
         <View className="mt-12 w-full px-5">
           <Button 
@@ -143,4 +163,3 @@ export default function RegisterStep3Screen() {
     </AuthLayout>
   );
 }
-
