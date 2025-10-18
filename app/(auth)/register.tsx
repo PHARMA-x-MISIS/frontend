@@ -7,7 +7,19 @@ import { router } from 'expo-router';
 import Button from 'components/Button';
 import AuthLayout from 'layouts/AuthLayout';
 import LabeledInput from 'components/LabeledInput';
-import { registrationStep2Schema, RegistrationStep2FormData } from 'src/lib/validation/authSchemas';
+import { z } from 'zod';
+
+// Правильная схема для ПЕРВОГО шага регистрации
+const registrationStep1Schema = z.object({
+  email: z.string().email('Введите корректный email'),
+  password: z.string().min(6, 'Пароль должен быть минимум 6 символов'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Пароли не совпадают',
+  path: ['confirmPassword'],
+});
+
+type RegistrationStep1FormData = z.infer<typeof registrationStep1Schema>;
 
 export default function RegisterScreen() {
   const {
@@ -15,8 +27,8 @@ export default function RegisterScreen() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<RegistrationStep2FormData>({
-    resolver: zodResolver(registrationStep2Schema),
+  } = useForm<RegistrationStep1FormData>({
+    resolver: zodResolver(registrationStep1Schema), // Используем правильную схему
     defaultValues: {
       email: '',
       password: '',
@@ -29,9 +41,9 @@ export default function RegisterScreen() {
   const confirmPassword = watch('confirmPassword');
   const isFormFilled = email.trim() !== '' && password.trim() !== '' && confirmPassword.trim() !== '';
 
-  const onSubmit = async (data: RegistrationStep2FormData) => {
+  const onSubmit = async (data: RegistrationStep1FormData) => {
     console.log('Данные регистрации:', data);
-    // Здесь будет переход на следующий шаг или API запрос
+    router.push('/(auth)/register-step2'); // Без .tsx
   };
 
   return (
@@ -61,10 +73,10 @@ export default function RegisterScreen() {
               error={errors.email?.message}
               keyboardType="email-address"
               autoCapitalize="none"
+              required={true}
             />
           )}
         />
-
         <Controller
           control={control}
           name="password"
@@ -77,6 +89,7 @@ export default function RegisterScreen() {
               value={value}
               error={errors.password?.message}
               secureTextEntry
+              required={true}
             />
           )}
         />
@@ -93,6 +106,7 @@ export default function RegisterScreen() {
               value={value}
               error={errors.confirmPassword?.message}
               secureTextEntry
+              required={true}
             />
           )}
         />

@@ -59,6 +59,7 @@ export default function LoginScreen() {
               error={errors.email?.message}
               keyboardType="email-address"
               autoCapitalize="none"
+              required={false}
             />
           )}
         />
@@ -75,6 +76,7 @@ export default function LoginScreen() {
               value={value}
               error={errors.password?.message}
               secureTextEntry
+              required={false}
             />
           )}
         />

@@ -2,7 +2,6 @@ import React from 'react';
 import { Pressable, Text, View, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-// Твои иконки
 import { Gosuslugi } from './icons';
 import { UilVk } from './icons';
 
@@ -58,7 +57,7 @@ export const Button = ({
     </View>
   );
 
-  // Градиентная кнопка
+
   if (isGradient) {
     return (
       <Pressable onPress={onPress} disabled={isDisabled} className="w-full">
@@ -80,7 +79,6 @@ export const Button = ({
     );
   }
 
-  // Outline кнопка с градиентной рамкой
   if (outline) {
     return (
       <Pressable onPress={onPress} disabled={isDisabled} className="w-full">
@@ -90,7 +88,7 @@ export const Button = ({
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={{
-              padding: 2, // толщина рамки
+              padding: 2, 
               borderRadius: 12,
             }}
           >
@@ -103,7 +101,7 @@ export const Button = ({
     );
   }
 
-  // Остальные кнопки (social, disabled)
+  
   const containerClasses = [
     'w-full py-3 px-6 rounded-xl flex-row justify-center items-center',
     disabled || loading
