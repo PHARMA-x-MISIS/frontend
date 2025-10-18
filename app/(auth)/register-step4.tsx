@@ -1,6 +1,6 @@
 // app/(auth)/register-step4.tsx
 import React, { useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import Button from 'components/Button';
 import AuthLayout from 'layouts/AuthLayout';
@@ -14,7 +14,6 @@ interface Competency {
   color: PillColorType;
 }
 
-// Список всех компетенций
 const ALL_COMPETENCIES: Competency[] = [
   { id: '1', name: 'Электроника', color: 'green' },
   { id: '2', name: 'Микроконтроллеры', color: 'blue' },
@@ -43,7 +42,6 @@ export default function RegisterStep4Screen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCompetencies, setSelectedCompetencies] = useState<string[]>([]);
 
-  // Фильтрация компетенций по поисковому запросу
   const filteredCompetencies = useMemo(() => {
     if (!searchQuery.trim()) {
       return ALL_COMPETENCIES;
@@ -53,7 +51,6 @@ export default function RegisterStep4Screen() {
     );
   }, [searchQuery]);
 
-  // Переключение выбора компетенции
   const toggleCompetency = (id: string) => {
     setSelectedCompetencies(prev =>
       prev.includes(id)
@@ -67,8 +64,7 @@ export default function RegisterStep4Screen() {
       return;
     }
     console.log('Выбранные компетенции:', selectedCompetencies);
-    // Завершение регистрации
-    // router.push('/(main)/profile');
+    router.push('/(auth)/register-step5');
   };
 
   return (
@@ -77,21 +73,21 @@ export default function RegisterStep4Screen() {
       subtitle="Выберите свои компетенции"
       showBackButton
       footer={
-        <View className="items-center">
-          <Text className="text-gray-600 font-onest-regular">Уже есть аккаунт?</Text>
-          <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-            <Text className="mt-1 text-blue-600 font-onest-semibold">Войти</Text>
-          </TouchableOpacity>
+        <View className="px-5">
+          <Button
+            title={selectedCompetencies.length >= 3 ? "Далее" : `Далее (${selectedCompetencies.length}/3)`}
+            outline={selectedCompetencies.length < 3}
+            onPress={onSubmit}
+          />
         </View>
       }>
-      <View className="flex-1">
-        {/* Поиск */}
-        <View className="mb-4 px-5">
-          <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-3">
+      <View className="px-5">
+        <View className="mb-8">
+          <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-2">
             <Lupa width={16} height={16}/>
             <TextInput
               className="flex-1 ml-2 font-onest-regular text-base"
-              placeholder="Поиск сообществ"
+              placeholder="Поиск"
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholderTextColor="#9CA3AF"
@@ -99,76 +95,50 @@ export default function RegisterStep4Screen() {
           </View>
         </View>
 
-        {/* Список компетенций */}
-        <ScrollView 
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 20 }}>
-          <View className="flex-row flex-wrap gap-2 justify-center">
-            {filteredCompetencies.map(comp => {
-              const isSelected = selectedCompetencies.includes(comp.id);
-              return (
-                <TouchableOpacity
-                  key={comp.id}
-                  onPress={() => toggleCompetency(comp.id)}
-                  activeOpacity={1}
-                  className={`rounded-full border ${
-                    isSelected 
-                      ? `border-black` 
-                      : 'border-black bg-white'
+        <View className="flex-row flex-wrap gap-2 justify-center">
+          {filteredCompetencies.map(comp => {
+            const isSelected = selectedCompetencies.includes(comp.id);
+            return (
+              <TouchableOpacity
+                key={comp.id}
+                onPress={() => toggleCompetency(comp.id)}
+                activeOpacity={1}
+                className={`rounded-full border ${
+                  isSelected 
+                    ? `border-black` 
+                    : 'border-black bg-white'
+                }`}>
+                {isSelected ? (
+                  <View className={`rounded-full px-2.5 py-1 ${
+                    comp.color === 'orange' ? 'bg-[#FFC995]' :
+                    comp.color === 'blue' ? 'bg-[#ABB2FF]' :
+                    comp.color === 'yellow' ? 'bg-[#F4FF96]' :
+                    comp.color === 'green' ? 'bg-[#00C587]' :
+                    'bg-[#79FF9F]'
                   }`}>
-                  {isSelected ? (
-                    <View className={`rounded-full px-2.5 py-1 ${
-                      comp.color === 'orange' ? 'bg-[#FFC995]' :
-                      comp.color === 'blue' ? 'bg-[#ABB2FF]' :
-                      comp.color === 'yellow' ? 'bg-[#F4FF96]' :
-                      comp.color === 'green' ? 'bg-[#00C587]' :
-                      'bg-[#79FF9F]'
-                    }`}>
-                      <Text className="text-[15px] text-black">
-                        {comp.name}
-                      </Text>
-                    </View>
-                  ) : (
-                    <View className="rounded-full px-2.5 py-1 bg-white">
-                      <Text className="font-onest-semibold text-[15px] text-black">
-                        {comp.name}
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          {filteredCompetencies.length === 0 && (
-            <View className="items-center justify-center py-10">
-              <Text className="text-gray-400 font-onest-regular">
-                Ничего не найдено
-              </Text>
-            </View>
-          )}
-        </ScrollView>
-
-        {/* Кнопка "Далее" */}
-        <View className="px-5 pb-4">
-          {selectedCompetencies.length < 3 && (
-            <View className="items-center mb-3">
-              <Text className="text-gray-500 font-onest-regular">
-                Нет нужного?{' '}
-                <Text className="text-blue-600 font-onest-semibold">
-                  Добавить
-                </Text>
-              </Text>
-            </View>
-          )}
-          
-          <Button
-            title={`Далее (${selectedCompetencies.length}/3)`}
-            outline={selectedCompetencies.length < 3}
-            onPress={onSubmit}
-          />
+                    <Text className="font-onest-semibold text-[15px] text-black">
+                      {comp.name}
+                    </Text>
+                  </View>
+                ) : (
+                  <View className="rounded-full px-2.5 py-1 bg-white">
+                    <Text className="font-onest-semibold text-[15px] text-black">
+                      {comp.name}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
+
+        {filteredCompetencies.length === 0 && (
+          <View className="items-center justify-center py-10">
+            <Text className="text-gray-400 font-onest-regular">
+              Ничего не найдено
+            </Text>
+          </View>
+        )}
       </View>
     </AuthLayout>
   );

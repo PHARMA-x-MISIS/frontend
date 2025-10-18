@@ -43,15 +43,7 @@ export default function RegisterStep3Screen() {
     <AuthLayout
       title="Регистрация"
       subtitle="Контактные данные"
-      showBackButton
-      footer={
-        <View className="items-center">
-          <Text className="text-gray-600 font-onest-regular">Уже есть аккаунт?</Text>
-          <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-            <Text className="mt-1 text-blue-600 font-onest-semibold">Войти</Text>
-          </TouchableOpacity>
-        </View>
-      }>
+      showBackButton>
       <View className="gap-y-2">
         <Controller
           control={control}
