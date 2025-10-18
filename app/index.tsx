@@ -13,7 +13,7 @@ export default function Index() {
       if (isAuthenticated) {
         router.replace('/(main)/profile');
       } else {
-        router.replace('/(main)/(community)/create-step1');
+        router.replace('/(auth)/register');
       }
     }, 500);
   }, []);

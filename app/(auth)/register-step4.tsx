@@ -67,7 +67,6 @@ export default function RegisterStep4Screen() {
     router.push('/(auth)/register-step5');
   };
 
-  // ... (rest of the component remains the same, but replace ALL_COMPETENCIES with allCompetencies)
 
 
   return (
