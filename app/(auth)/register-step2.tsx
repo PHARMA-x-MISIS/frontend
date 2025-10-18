@@ -8,8 +8,8 @@ import Button from 'components/Button';
 import AuthLayout from 'layouts/AuthLayout';
 import LabeledInput from 'components/LabeledInput';
 import { z } from 'zod';
+import { useRegistration } from '../../src/lib/contexts/RegistrationContext';
 
-// Схема валидации для второго шага
 const registrationStep2Schema = z.object({
   firstName: z.string().min(1, 'Введите имя'),
   lastName: z.string().min(1, 'Введите фамилию'),
@@ -18,15 +18,21 @@ const registrationStep2Schema = z.object({
     .refine((date) => {
       const [day, month, year] = date.split('.').map(Number);
       const dateObj = new Date(year, month - 1, day);
-      return dateObj.getDate() === day && 
-             dateObj.getMonth() === month - 1 && 
-             dateObj.getFullYear() === year;
+      return (
+        dateObj &&
+        dateObj.getFullYear() === year &&
+        dateObj.getMonth() === month - 1 &&
+        dateObj.getDate() === day
+      );
     }, 'Введите корректную дату'),
 });
+
 
 type RegistrationStep2FormData = z.infer<typeof registrationStep2Schema>;
 
 export default function RegisterStep2Screen() {
+  const { updateData } = useRegistration();
+
   const {
     control,
     handleSubmit,
@@ -41,13 +47,14 @@ export default function RegisterStep2Screen() {
     },
   });
 
+
   const firstName = watch('firstName');
   const lastName = watch('lastName');
   const birthDate = watch('birthDate');
   const isFormFilled = firstName.trim() !== '' && lastName.trim() !== '' && birthDate.trim() !== '';
 
   const formatBirthDate = (text: string) => {
-    const cleaned = text.replace(/\D/g, '');
+    const cleaned = text.replace(/\D/g, ''); 
     if (cleaned.length <= 2) {
       return cleaned;
     } else if (cleaned.length <= 4) {
@@ -57,8 +64,13 @@ export default function RegisterStep2Screen() {
     }
   };
 
-  const onSubmit = async (data: RegistrationStep2FormData) => {
-    console.log('Данные второго шага регистрации:', data);
+  const onSubmit = (data: RegistrationStep2FormData) => {
+    updateData({
+      first_name: data.firstName,
+      last_name: data.lastName,
+      birthDate: data.birthDate,
+    });
+
     router.push('/(auth)/register-step3');
   };
 
@@ -125,15 +137,15 @@ export default function RegisterStep2Screen() {
               value={value}
               error={errors.birthDate?.message}
               keyboardType="numeric"
-              maxLength={10}
+              maxLength={10} 
               required
             />
           )}
         />
 
         <View className="mt-20 w-full px-5">
-          <Button 
-            title="Далее" 
+          <Button
+            title="Далее"
             outline={!isFormFilled}
             onPress={handleSubmit(onSubmit)}
           />

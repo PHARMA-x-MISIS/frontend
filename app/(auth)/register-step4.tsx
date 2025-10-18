@@ -1,10 +1,12 @@
 // app/(auth)/register-step4.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import Button from 'components/Button';
 import AuthLayout from 'layouts/AuthLayout';
 import { Lupa } from 'components/icons';
+import { getSkills } from 'api/api';
+import { useRegistration } from '../../src/lib/contexts/RegistrationContext';
 
 type PillColorType = 'orange' | 'blue' | 'yellow' | 'green' | 'lightgreen';
 
@@ -14,42 +16,40 @@ interface Competency {
   color: PillColorType;
 }
 
-const ALL_COMPETENCIES: Competency[] = [
-  { id: '1', name: 'Электроника', color: 'green' },
-  { id: '2', name: 'Микроконтроллеры', color: 'blue' },
-  { id: '3', name: 'Мехатроника', color: 'orange' },
-  { id: '4', name: 'CAD/3D', color: 'yellow' },
-  { id: '5', name: 'Физика', color: 'lightgreen' },
-  { id: '6', name: '3d-печать', color: 'green' },
-  { id: '7', name: 'Сварка', color: 'blue' },
-  { id: '8', name: 'Математика', color: 'orange' },
-  { id: '9', name: 'Материаловедение', color: 'yellow' },
-  { id: '10', name: 'Механика', color: 'lightgreen' },
-  { id: '11', name: 'Биоинформатика', color: 'green' },
-  { id: '12', name: 'Лазерная резка', color: 'blue' },
-  { id: '13', name: 'Контроль качества', color: 'orange' },
-  { id: '14', name: 'Сборка', color: 'yellow' },
-  { id: '15', name: 'Управление БПЛА', color: 'lightgreen' },
-  { id: '16', name: 'Виброанализ', color: 'green' },
-  { id: '17', name: 'Метрология', color: 'blue' },
-  { id: '18', name: 'MES-фарма', color: 'orange' },
-  { id: '19', name: 'Фотолитография', color: 'yellow' },
-  { id: '20', name: 'Электротест', color: 'lightgreen' },
-  { id: '21', name: 'САПР-процессы', color: 'green' },
-];
+const colors: PillColorType[] = ['orange', 'blue', 'yellow', 'green', 'lightgreen'];
+const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
 
 export default function RegisterStep4Screen() {
+  const { updateData } = useRegistration();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCompetencies, setSelectedCompetencies] = useState<string[]>([]);
+  const [allCompetencies, setAllCompetencies] = useState<Competency[]>([]);
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const skills = await getSkills();
+        const formattedSkills = skills.map(skill => ({
+          id: skill,
+          name: skill,
+          color: getRandomColor(),
+        }));
+        setAllCompetencies(formattedSkills);
+      } catch (error) {
+        console.error('Failed to fetch skills:', error);
+      }
+    };
+    fetchSkills();
+  }, []);
 
   const filteredCompetencies = useMemo(() => {
     if (!searchQuery.trim()) {
-      return ALL_COMPETENCIES;
+      return allCompetencies;
     }
-    return ALL_COMPETENCIES.filter(comp =>
+    return allCompetencies.filter(comp =>
       comp.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, allCompetencies]);
 
   const toggleCompetency = (id: string) => {
     setSelectedCompetencies(prev =>
@@ -63,9 +63,12 @@ export default function RegisterStep4Screen() {
     if (selectedCompetencies.length < 3) {
       return;
     }
-    console.log('Выбранные компетенции:', selectedCompetencies);
+    updateData({ skills: selectedCompetencies });
     router.push('/(auth)/register-step5');
   };
+
+  // ... (rest of the component remains the same, but replace ALL_COMPETENCIES with allCompetencies)
+
 
   return (
     <AuthLayout
