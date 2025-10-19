@@ -73,26 +73,25 @@ export default function MainAppLayout() {
           tabBarIcon: ({ color }) => <ProfileIcon color={color} size={28} />,
         }}
       />
-
-      {/* --- Скрытые экраны (доступны для навигации, но не видны в таб-баре) --- */}
-      
-      <Tabs.Screen
-        // Регистрируем всю папку `community`, чтобы вложенные маршруты (например, `community/[id]`) работали
-        name="community"
-        options={{
-          href: null,
-        }}
-      />
       <Tabs.Screen
         name="recommendations"
         options={{
           href: null,
+          tabBarItemStyle: { display: 'none' },
         }}
       />
       <Tabs.Screen
         name="store"
         options={{
           href: null,
+          tabBarItemStyle: { display: 'none' },
+        }}
+      />
+      <Tabs.Screen
+        name="community"
+        options={{
+          href: null,
+          tabBarItemStyle: { display: 'none' },
         }}
       />
     </Tabs>

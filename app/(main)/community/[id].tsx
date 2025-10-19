@@ -99,7 +99,7 @@ export default function CommunityProfileScreen() {
         <View style={styles.statsRow}>
           <Gift size={16} color="#E94975" />
           <Text style={styles.statsText}>У вас 14 очков сообщества · </Text>
-          <TouchableOpacity><Text style={styles.linkText}>обменять</Text></TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/store')}><Text style={styles.linkText}>обменять</Text></TouchableOpacity>
         </View>
         <View style={styles.statsRow}>
           <Info size={16} color="gray" />
