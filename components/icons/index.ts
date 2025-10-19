@@ -1,6 +1,5 @@
 export { default as CheckIcon } from './CheckIcon'
 export { default as Coin } from './Coin'
-export { default as CommunityIcon } from './CommunityIcon'
 export { default as Edit } from './Edit'
 export { default as Gosuslugi } from './Gosuslugi'
 export { default as Grid } from './Grid'
@@ -11,13 +10,10 @@ export { default as Notifications } from './Notifications'
 export { default as Photo } from './Photo'
 export { default as Plus } from './Plus'
 export { default as Profile } from './Profile'
-export { default as ProfileIcon } from './ProfileIcon'
 export { default as RightArrow } from './RightArrow'
-<<<<<<< HEAD
-export { default as UilVk } from './UilVk'
 export * from './ProfileIcon';
 export * from './CommunityIcon';
-=======
 export { default as TablerCoins } from './TablerCoins'
 export { default as UilVk } from './UilVk'
->>>>>>> origin/semi
+export * from './ServiceIcon';
+export * from './ChatIcon';

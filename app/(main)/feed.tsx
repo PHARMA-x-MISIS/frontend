@@ -10,12 +10,13 @@ import {
   RefreshControl,
   Alert
 } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, router } from 'expo-router';
 // --- API ---
-import { getPosts } from 'api/api';
+import { getPosts, PostRead } from 'api/api';
 // --- Компоненты ---
 import PostCard from 'components/PostCard';
-import { PostRead } from 'api/types';
+// --- Иконки ---
+import { Plus } from 'lucide-react-native';
 
 export default function FeedScreen() {
   // --- Состояния компонента ---
@@ -25,10 +26,8 @@ export default function FeedScreen() {
   const [activeTab, setActiveTab] = useState<'feed' | 'events'>('feed');
 
   // --- Функция для загрузки данных ---
-  // Оборачиваем в useCallback для использования в onRefresh и useFocusEffect
   const loadPosts = useCallback(async () => {
     try {
-      // Получаем все посты без фильтрации по community_id
       const fetchedPosts = await getPosts();
       setPosts(fetchedPosts);
     } catch (error) {
@@ -38,7 +37,7 @@ export default function FeedScreen() {
   }, []);
 
   // --- Эффекты ---
-  // Первоначальная загрузка
+  // Первоначальная загрузка при фокусе экрана
   useFocusEffect(
     useCallback(() => {
       setIsLoading(true);
@@ -74,33 +73,45 @@ export default function FeedScreen() {
 
   return (
     <View style={styles.container}>
-      {/* --- Шапка с переключателем вкладок --- */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'feed' && styles.activeTab]}
-          onPress={() => setActiveTab('feed')}>
-          <Text style={[styles.tabText, activeTab === 'feed' && styles.activeTabText]}>Лента публикаций</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'events' && styles.activeTab]}
-          onPress={() => setActiveTab('events')}>
-          <Text style={[styles.tabText, activeTab === 'events' && styles.activeTabText]}>События</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* --- Список постов --- */}
+      {/* Обертка нужна для абсолютного позиционирования FAB */}
+      
       <FlatList
         data={posts}
         renderItem={({ item }) => <PostCard post={item} />}
         keyExtractor={item => item.id.toString()}
-        contentContainerStyle={{ paddingBottom: 16 }} // Отступ снизу
-        // Добавляем функционал "Pull to Refresh"
-        refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        // Отступ снизу, чтобы FAB не перекрывал последний пост
+        contentContainerStyle={{ paddingBottom: 80 }} 
+        // Шапка со вкладками теперь является частью списка
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <TouchableOpacity 
+              style={[styles.tab, activeTab === 'feed' && styles.activeTab]}
+              onPress={() => setActiveTab('feed')}>
+              <Text style={[styles.tabText, activeTab === 'feed' && styles.activeTabText]}>Лента публикаций</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.tab, activeTab === 'events' && styles.activeTab]}
+              onPress={() => setActiveTab('events')}>
+              <Text style={[styles.tabText, activeTab === 'events' && styles.activeTabText]}>События</Text>
+            </TouchableOpacity>
+          </View>
         }
         // Компонент, если список пуст
         ListEmptyComponent={!isLoading ? ListEmptyComponent : null}
+        // Функционал "Pull to Refresh"
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        }
       />
+
+      {/* --- Плавающая кнопка для создания поста --- */}
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={() => router.push('/(post)/create')}
+        activeOpacity={0.8}
+      >
+        <Plus size={28} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -119,11 +130,12 @@ const styles = StyleSheet.create({
   header: { 
     flexDirection: 'row', 
     padding: 16, 
-    paddingTop: 60, // Отступ для статус-бара
+    paddingTop: 60, 
     gap: 8, 
     backgroundColor: 'white', 
     borderBottomWidth: 1, 
-    borderBottomColor: '#e5e7eb' 
+    borderBottomColor: '#e5e7eb',
+    marginBottom: 8,
   },
   tab: { 
     paddingVertical: 8, 
@@ -132,7 +144,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f3f4f6' 
   },
   activeTab: { 
-    backgroundColor: '#e5e7eb' // Более темный фон для активной вкладки
+    backgroundColor: '#e5e7eb'
   },
   tabText: { 
     fontFamily: 'Onest-Medium', 
@@ -148,5 +160,21 @@ const styles = StyleSheet.create({
     fontFamily: 'Onest-Regular', 
     color: 'gray',
     fontSize: 16,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#E94975',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });

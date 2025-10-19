@@ -16,18 +16,11 @@ import UserInfo from 'components/UserInfo';
 import CompetencyBlock from 'components/CompetencyBlock';
 import AboutUserBlock from 'components/AboutUserBlock';
 import CommunitiesBlock from 'components/CommunitiesBlock';
-<<<<<<< HEAD
-// Ваши иконки
 import { LeftArrow, Edit } from 'components/icons';
 // Функции API и контекст
 import { getCurrentUser, getMyCommunities } from 'api/api';
 import { useAuth } from 'src/lib/contexts/AuthContext';
-import { UserRead, CommunityRead } from 'src/lib/types/api';
-=======
-import LabeledInput from 'components/LabeledInput';
-import { router } from 'expo-router';
-
->>>>>>> origin/semi
+import { UserRead, CommunityRead } from 'api/types';
 
 const ProfileScreen = () => {
   const { signOut } = useAuth();

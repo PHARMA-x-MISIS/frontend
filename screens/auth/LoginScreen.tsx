@@ -56,8 +56,7 @@ const LoginScreen = () => {
               value={value}
               error={errors.email?.message}
               keyboardType="email-address"
-              autoCapitalize="none"
-            />
+              autoCapitalize="none" required={false}            />
           )}
         />
 
@@ -72,8 +71,7 @@ const LoginScreen = () => {
               onChangeText={onChange}
               value={value}
               error={errors.password?.message}
-              secureTextEntry
-            />
+              secureTextEntry required={false}            />
           )}
         />
 

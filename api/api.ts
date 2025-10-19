@@ -3,16 +3,6 @@ import { LoginFormData } from 'src/lib/validation/authSchemas';
 import { RegistrationData } from 'src/lib/contexts/RegistrationContext';
 import * as T from './types'
 
-import axios from 'axios';
-import { LoginFormData } from 'src/lib/validation/authSchemas';
-import { RegistrationData } from 'src/lib/contexts/RegistrationContext';
-import * as T from './types'
-
-
-export const apiClient = axios.create({
-  baseURL: 'https://mosprom.misis-team.ru',
-  headers: { 'Content-Type': 'application/json' },
-});
 
 export const apiClient = axios.create({
   baseURL: 'https://mosprom.misis-team.ru',
@@ -33,64 +23,6 @@ const handleApiError = (error: any, customMessages: { [key: number]: string } = 
   return 'Произошла непредвиденная ошибка.';
 };
 
-
-
-
-
-
-// --------------------
-// --- Секция: users ---
-// --------------------
-
-// POST /users/register
-export const registerUser = async (userData: T.UserCreate): Promise<T.UserRead> => {
-  try {
-    const response = await apiClient.post<T.UserRead>('/users/register', userData);
-    return response.data;
-  } catch (error) { throw new Error(handleApiError(error)); }
-};
-
-// POST /users/login
-export const loginUser = async (credentials: T.UserLogin): Promise<T.Token> => {
-  try {
-    const response = await apiClient.post<T.Token>('/users/login', credentials);
-    return response.data;
-  } catch (error) { throw new Error(handleApiError(error, { 401: 'Неверный email или пароль.' })); }
-};
-
-// GET /users/me
-export const getCurrentUser = async (): Promise<T.UserRead> => {
-  try {
-    const response = await apiClient.get<T.UserRead>('/users/me');
-    return response.data;
-  } catch (error) { throw new Error(handleApiError(error)); }
-};
-
-// PUT /users/me
-export const updateCurrentUser = async (userData: T.UserUpdate): Promise<T.UserRead> => {
-  try {
-    const response = await apiClient.put<T.UserRead>('/users/me', userData);
-    return response.data;
-  } catch (error) { throw new Error(handleApiError(error)); }
-};
-
-// DELETE /users/me
-export const deleteCurrentUser = async (): Promise<void> => {
-  try {
-    await apiClient.delete('/users/me');
-  } catch (error) { throw new Error(handleApiError(error)); }
-};
-
-// POST /users/me/change-password
-export const changePassword = async (passData: T.UserChangePassword): Promise<any> => {
-  try {
-    const response = await apiClient.post('/users/me/change-password', passData);
-    return response.data;
-  } catch (error) { throw new Error(handleApiError(error)); }
-};
-
-// GET /users/me/skills
-export const getCurrentUserSkills = async (): Promise<string[]> => {
 
 
 
@@ -259,7 +191,9 @@ export const leaveCommunity = async (communityId: number): Promise<any> => {
   try {
     const response = await apiClient.post(`/communities/${communityId}/leave`);
     return response.data;
-  } catch (error) { throw new Error(handleApiError(error)); }
+  } catch (error) {
+    throw new Error(handleApiError(error));
+  }
 };
 
 // ---------------------
@@ -363,14 +297,6 @@ export const updateComment = async (commentId: number, commentData: T.CommentUpd
   try {
     const response = await apiClient.put<T.CommentRead>(`/comments/${commentId}`, commentData);
     return response.data;
-  } catch (error) { throw new Error(handleApiError(error)); }
-};
-
-// DELETE /comments/{comment_id}
-export const deleteComment = async (commentId: number): Promise<void> => {
-  try {
-    await apiClient.delete(`/comments/${commentId}`);
-  } catch (error) { throw new Error(handleApiError(error)); }
   } catch (error) { throw new Error(handleApiError(error)); }
 };
 

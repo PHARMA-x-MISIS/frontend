@@ -1,3 +1,4 @@
+// app/(auth)/register-step5.tsx
 import React, { useState } from 'react';
 import { 
   View, 
@@ -12,21 +13,19 @@ import Button from 'components/Button';
 import AuthLayout from 'layouts/AuthLayout';
 import SuccessModal from 'components/SuccessModal';
 import { Photo } from 'components/icons';
-import { useRegistration } from '../../src/lib/contexts/RegistrationContext';
+import { useRegistration } from 'src/lib/contexts/RegistrationContext';
 import { registerUser } from 'api/api';
 
 export default function RegisterStep5Screen() {
   const { data } = useRegistration();
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
-
-
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Требуется разрешение', 'Пожалуйста, предоставьте доступ к вашей галерее, чтобы выбрать фото.');
+      Alert.alert('Требуется разрешение', 'Пожалуйста, предоставьте доступ к вашей галерее.');
       return;
     }
 
@@ -60,6 +59,7 @@ export default function RegisterStep5Screen() {
     
     try {
       await registerUser(finalData);
+      // При успехе - показываем модальное окно
       setShowModal(true);
     } catch (error) {
       console.error('Registration failed:', error);
@@ -69,14 +69,14 @@ export default function RegisterStep5Screen() {
     }
   };
 
-  const handleRecommendations = () => {
+  // Эта функция будет вызываться из обеих кнопок модального окна
+  const redirectToLogin = () => {
     setShowModal(false);
-    router.replace('/(main)/recommendations');
-  };
-
-  const handleProfile = () => {
-    setShowModal(false);
-    router.replace('/(main)/profile');
+    // Переходим на экран логина и передаем email для автозаполнения
+    router.replace({
+      pathname: '/(auth)/login',
+      params: { email: data.email },
+    });
   };
 
   return (
@@ -112,7 +112,6 @@ export default function RegisterStep5Screen() {
                 </View>
               )}
             </View>
-            
             <View className="absolute bottom-0 right-0 w-12 h-12 bg-white rounded-full items-center justify-center border-2 border-gray-200">
               <Text className="text-red-500 text-3xl font-light">+</Text>
             </View>
@@ -122,14 +121,15 @@ export default function RegisterStep5Screen() {
 
       <SuccessModal
         isVisible={showModal}
-        onClose={() => setShowModal(false)}
-        onPrimaryPress={handleRecommendations}
-        onSecondaryPress={handleProfile}
+        onClose={redirectToLogin}
+        onPrimaryPress={redirectToLogin} // Обе кнопки ведут на логин
+        primaryButtonText="Войти в аккаунт"
+        // Вторичную кнопку можно убрать или сделать такой же
+        // onSecondaryPress={redirectToLogin}
+        // secondaryButtonText="Профиль"
         title="Аккаунт создан!"
-        description="Пора вступить в сообщества по интересам. Алгоритм подберёт наиболее подходящие сообщества персонально для вас."
-        primaryButtonText="Сообщества по интересу"
-        secondaryButtonText="Профиль"
-        image={require('assets/icons/happy.png')}
+        description="Теперь вы можете войти в свой новый аккаунт, используя указанные почту и пароль."
+        image={require('assets/icons/happy.png')} // Убедитесь, что путь правильный
       />
     </>
   );
