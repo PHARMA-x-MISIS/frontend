@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import EntityListItem from 'components/EntityListItem';
 import { Plus, CheckIcon } from 'components/icons';
-import FooterTabs from 'components/FooterTabs';
 
 const MOCK_COMMUNITIES = [
   { id: '1', name: 'Р Фарм', category: 'Техника', subscribers: 797, avatarUrl: 'https://i.pravatar.cc/150?u=a1', isVerified: true },
@@ -56,7 +55,6 @@ export default function RecommendationsScreen() {
           ItemSeparatorComponent={() => <View className="h-px bg-gray-200" />}
         />
         
-        <FooterTabs activeTab="profile" />
       </View>
     </SafeAreaView>
   );

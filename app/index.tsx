@@ -13,7 +13,7 @@ export default function Index() {
       if (!isAuthenticated) {
         router.replace('/(main)/store');
       } else {
-        router.replace('/(auth)/register');
+        router.replace('/(main)/store');
       }
     }, 500);
   }, []);

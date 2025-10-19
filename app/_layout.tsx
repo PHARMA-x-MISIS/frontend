@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import { useEffect } from 'react';
+import { AuthProvider } from 'src/lib/contexts/AuthContext';
 
 // Импортируем CSS из корневого лэйаута. Путь ../global.css отсюда будет верным.
 import '../global.css';
@@ -30,9 +31,11 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar style="auto" />
-      <Slot />
-    </SafeAreaProvider>
+    <AuthProvider>
+      <SafeAreaProvider>
+        <StatusBar style="auto" />
+        <Slot />
+      </SafeAreaProvider>
+    </AuthProvider>
   );
 }

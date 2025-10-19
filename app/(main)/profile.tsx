@@ -6,7 +6,6 @@ import { Edit } from 'components/icons';
 import CompetencyBlock from 'components/CompetencyBlock';
 import AboutUserBlock from 'components/AboutUserBlock';
 import CommunitiesBlock from 'components/CommunitiesBlock';
-import FooterTabs from 'components/FooterTabs';
 import LabeledInput from 'components/LabeledInput';
 import { router } from 'expo-router';
 
@@ -52,7 +51,6 @@ const ProfileScreen = () => {
 
 
       </ScrollView>
-      <FooterTabs activeTab="profile" />
     </View>
   );
 };

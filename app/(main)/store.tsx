@@ -4,7 +4,6 @@ import { View, Text, FlatList, TouchableOpacity, Dimensions, Modal, Image } from
 import { Stack, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProductCard from 'components/ProductCard';
-import FooterTabs from 'components/FooterTabs';
 import Button from 'components/Button';
 import { Coin, LeftArrow, TablerCoins } from 'components/icons';
 
@@ -114,7 +113,6 @@ export default function StoreScreen() {
           contentContainerStyle={{ paddingHorizontal: isSmallScreen ? 16 : 20 }}
           showsVerticalScrollIndicator={false}
         />
-        <FooterTabs activeTab="profile" />
       </View>
 
       {/* Модальное окно подтверждения покупки */}
