@@ -1,7 +1,11 @@
 import React from 'react';
 import { Feather } from '@expo/vector-icons';
 
+<<<<<<< HEAD
 // Используем тот же тип props
+=======
+
+>>>>>>> origin/semi
 interface IconProps {
   color?: string;
   size?: number;
