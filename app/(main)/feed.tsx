@@ -12,11 +12,12 @@ import {
 } from 'react-native';
 import { useFocusEffect, router } from 'expo-router';
 // --- API ---
-import { getPosts, PostRead } from 'api/api';
+import { getPosts } from 'api/api';
 // --- Компоненты ---
 import PostCard from 'components/PostCard';
 // --- Иконки ---
 import { Plus } from 'lucide-react-native';
+import { PostRead } from 'api/types';
 
 export default function FeedScreen() {
   // --- Состояния компонента ---
