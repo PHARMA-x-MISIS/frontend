@@ -1,18 +1,27 @@
 // components/PostCard.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { likePost, unlikePost, getCommunityById } from 'api/api';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { router } from 'expo-router';
+import {
+  likePost,
+  unlikePost,
+  getCommunityById,
+  getUserById,
+  joinCommunity,
+} from 'api/api';
+// Для иконок: npx expo install lucide-react-native
 import { Heart, MessageSquare, PlusCircle } from 'lucide-react-native';
 import { PostRead } from 'api/types';
 
-// Тип для информации об авторе поста (сообществе или пользователе)
+// Тип для хранения унифицированной информации об авторе
 interface AuthorInfo {
   name: string;
   avatarUrl?: string | null;
   details: string;
 }
 
-const formatDate = (dateString: string) => {
+// Утилитарная функция для форматирования даты
+const formatDate = (dateString: string): string => {
   try {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, '0');
@@ -21,24 +30,30 @@ const formatDate = (dateString: string) => {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${day}.${month}.${year} ${hours}:${minutes}`;
-  } catch { return dateString; }
+  } catch {
+    return dateString;
+  }
 };
 
-const formatCount = (count: number) => {
-  if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
+// Утилитарная функция для форматирования чисел (1234 -> 1.2k)
+const formatCount = (count: number): string => {
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}k`;
+  }
   return count.toString();
 };
 
 
 export default function PostCard({ post }: { post: PostRead }) {
-  // --- Состояния ---
+  // --- Состояния компонента ---
   const [isLiked, setIsLiked] = useState(post.is_liked);
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [authorInfo, setAuthorInfo] = useState<AuthorInfo | null>(null);
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
-  // --- Загрузка данных об авторе ---
+  // --- Эффект для загрузки данных об авторе ---
   useEffect(() => {
-    // Если есть community_id, значит пост от сообщества
+    // Если есть community_id, значит автор - сообщество
     if (post.community_id) {
       getCommunityById(post.community_id)
         .then(community => {
@@ -48,75 +63,97 @@ export default function PostCard({ post }: { post: PostRead }) {
             details: `${community.skills.slice(0, 1).join(', ')}, ${community.member_count} подписчиков`,
           });
         })
-        .catch(() => {
-          // Если сообщество не найдено
-          setAuthorInfo({ name: 'Неизвестное сообщество', details: '' });
-        });
+        .catch(() => setAuthorInfo({ name: 'Неизвестное сообщество', details: '' }));
     } else {
-      // TODO: Загрузить данные о пользователе по post.author_id
-      setAuthorInfo({
-        name: `Пользователь ${post.author_id}`,
-        avatarUrl: null, // заглушка
-        details: formatDate(post.created_at),
-      });
+      // Иначе, автор - пользователь
+      getUserById(post.author_id)
+        .then(user => {
+          setAuthorInfo({
+            name: `${user.first_name} ${user.last_name}`,
+            avatarUrl: user.profile_photo,
+            details: formatDate(post.created_at),
+          });
+        })
+        .catch(() => setAuthorInfo({ name: 'Неизвестный пользователь', details: '' }));
     }
   }, [post.community_id, post.author_id]);
 
-  // --- Обработчик лайка ---
+  // --- Обработчик лайка с оптимистичным обновлением ---
   const handleLike = async () => {
-    // Оптимистичное обновление UI
     const originalLiked = isLiked;
     const originalCount = likeCount;
-
     setIsLiked(!originalLiked);
     setLikeCount(originalLiked ? originalCount - 1 : originalCount + 1);
-
     try {
       const apiCall = originalLiked ? unlikePost : likePost;
       const response = await apiCall(post.id);
-      // Обновляем состояние из ответа сервера для синхронизации
       setIsLiked(response.liked);
       setLikeCount(response.like_count);
     } catch (error) {
-      // В случае ошибки откатываем изменения
       setIsLiked(originalLiked);
       setLikeCount(originalCount);
-      console.error('Like/unlike failed:', error);
+      console.error('Ошибка лайка/анлайка:', error);
+    }
+  };
+  
+  // --- Обработчик перехода на страницу автора ---
+  const handleHeaderPress = () => {
+    if (post.community_id) {
+      router.push(`/(main)/community/${post.community_id}`);
+    }
+    // TODO: Добавить переход на профиль пользователя
+  };
+
+  // --- Обработчик подписки на сообщество ---
+  const handleSubscribe = async () => {
+    if (!post.community_id) return;
+    setIsSubscribing(true);
+    try {
+      await joinCommunity(post.community_id);
+      Alert.alert('Успех!', `Вы подписались на сообщество "${authorInfo?.name || ''}".`);
+      // TODO: Обновить UI, чтобы скрыть кнопку
+    } catch (error) {
+      Alert.alert('Ошибка', (error as Error).message);
+    } finally {
+      setIsSubscribing(false);
     }
   };
 
+  // Не рендерим ничего, пока информация об авторе не загружена
   if (!authorInfo) {
-    return null; 
+    return null;
   }
 
   return (
     <View style={styles.card}>
-  
-      <View style={styles.header}>
-        <Image 
-          source={authorInfo.avatarUrl ? { uri: authorInfo.avatarUrl } : require('assets/images/avatar-placeholder.png')}
-          style={styles.avatar}
-        />
-        <View style={styles.headerText}>
-          <Text style={styles.authorName}>{authorInfo.name}</Text>
-          <Text style={styles.authorDetails}>{authorInfo.details}</Text>
+      {/* --- Шапка поста (кликабельная) --- */}
+      <TouchableOpacity onPress={handleHeaderPress} activeOpacity={0.8}>
+        <View style={styles.header}>
+          <Image 
+            source={authorInfo.avatarUrl ? { uri: authorInfo.avatarUrl } : require('assets/images/avatar-placeholder.png')}
+            style={styles.avatar}
+          />
+          <View style={styles.headerText}>
+            <Text style={styles.authorName}>{authorInfo.name}</Text>
+            <Text style={styles.authorDetails}>{authorInfo.details}</Text>
+          </View>
+          {post.community_id && (
+            <TouchableOpacity onPress={handleSubscribe} disabled={isSubscribing} style={styles.subscribeButton}>
+              <PlusCircle size={28} color="#E94975" />
+            </TouchableOpacity>
+          )}
         </View>
-        {post.community_id && (
-          <TouchableOpacity style={styles.subscribeButton}>
-            <PlusCircle size={28} color="#E94975" />
-          </TouchableOpacity>
-        )}
-      </View>
+      </TouchableOpacity>
 
-
+      {/* --- Текст поста --- */}
       <Text style={styles.content}>{post.text}</Text>
 
-
+      {/* --- Футер поста (лайки, комменты и кнопка) --- */}
       <View style={styles.footer}>
         <View style={styles.actions}>
           <TouchableOpacity onPress={handleLike} style={styles.actionButton}>
             <Heart size={22} color={isLiked ? '#E94975' : '#9CA3AF'} fill={isLiked ? '#E94975' : 'none'} />
-            <Text style={[styles.actionText, isLiked && { color: '#E94975' }]}>
+            <Text style={[styles.actionText, isLiked && styles.actionTextLiked]}>
               {formatCount(likeCount)}
             </Text>
           </TouchableOpacity>
@@ -125,28 +162,85 @@ export default function PostCard({ post }: { post: PostRead }) {
             <Text style={styles.actionText}>{formatCount(post.comment_count)}</Text>
           </TouchableOpacity>
         </View>
+        
         {/* TODO: Добавить логику для кнопки "К событию" */}
-        {/* <TouchableOpacity style={styles.eventButton}>
-          <Text style={styles.eventButtonText}>К событию</Text>
-        </TouchableOpacity> */}
       </View>
     </View>
   );
 }
 
+// --- Стили ---
 const styles = StyleSheet.create({
-  card: { backgroundColor: 'white', padding: 16, borderRadius: 12, marginBottom: 12, elevation: 2 },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  avatar: { width: 48, height: 48, borderRadius: 24, marginRight: 12 },
-  headerText: { flex: 1 },
-  authorName: { fontFamily: 'Onest-SemiBold', fontSize: 18 },
-  authorDetails: { fontFamily: 'Onest-Regular', fontSize: 13, color: 'gray' },
-  subscribeButton: { padding: 4 },
-  content: { fontFamily: 'Onest-Regular', fontSize: 16, lineHeight: 24, marginBottom: 16 },
-  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  actionButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f3f4f6', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 16 },
-  actionText: { fontFamily: 'Onest-Medium', marginLeft: 6, color: '#6B7280' },
-  eventButton: { backgroundColor: '#E94975', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 16 },
-  eventButtonText: { color: 'white', fontFamily: 'Onest-SemiBold' },
+  card: { 
+    backgroundColor: 'white', 
+    padding: 16, 
+    borderRadius: 16, 
+    marginBottom: 12, 
+    marginHorizontal: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  header: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginBottom: 12 
+  },
+  avatar: { 
+    width: 48, 
+    height: 48, 
+    borderRadius: 24, 
+    marginRight: 12,
+    backgroundColor: '#f0f2f5',
+  },
+  headerText: { 
+    flex: 1 
+  },
+  authorName: { 
+    fontFamily: 'Onest-SemiBold', 
+    fontSize: 18 
+  },
+  authorDetails: { 
+    fontFamily: 'Onest-Regular', 
+    fontSize: 13, 
+    color: '#6B7280' 
+  },
+  subscribeButton: { 
+    padding: 4 
+  },
+  content: { 
+    fontFamily: 'Onest-Regular', 
+    fontSize: 16, 
+    lineHeight: 24, 
+    marginBottom: 16 
+  },
+  footer: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between' 
+  },
+  actions: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 16 
+  },
+  actionButton: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#f3f4f6', 
+    paddingVertical: 8, 
+    paddingHorizontal: 12, 
+    borderRadius: 16 
+  },
+  actionText: { 
+    fontFamily: 'Onest-Medium', 
+    marginLeft: 6, 
+    color: '#6B7280',
+    fontSize: 14,
+  },
+  actionTextLiked: {
+    color: '#E94975',
+  },
 });

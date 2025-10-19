@@ -191,7 +191,9 @@ export const leaveCommunity = async (communityId: number): Promise<any> => {
   try {
     const response = await apiClient.post(`/communities/${communityId}/leave`);
     return response.data;
-  } catch (error) { throw new Error(handleApiError(error)); }
+  } catch (error) {
+    throw new Error(handleApiError(error));
+  }
 };
 
 // ---------------------
