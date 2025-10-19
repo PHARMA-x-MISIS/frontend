@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import Button from 'components/Button';
 import AuthLayout from 'layouts/AuthLayout';
 import { Lupa } from 'components/icons';
-import { getSkills } from 'api/api';
+import { getAllSkills } from 'api/api';
 import { useRegistration } from '../../src/lib/contexts/RegistrationContext';
 
 type PillColorType = 'orange' | 'blue' | 'yellow' | 'green' | 'lightgreen';
@@ -28,7 +28,7 @@ export default function RegisterStep4Screen() {
   useEffect(() => {
     const fetchSkills = async () => {
       try {
-        const skills = await getSkills();
+        const skills = await getAllSkills();
         const formattedSkills = skills.map(skill => ({
           id: skill,
           name: skill,

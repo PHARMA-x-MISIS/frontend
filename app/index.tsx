@@ -10,8 +10,8 @@ export default function Index() {
     
     // Небольшая задержка для красоты (опционально)
     setTimeout(() => {
-      if (isAuthenticated) {
-        router.replace('/(main)/profile');
+      if (!isAuthenticated) {
+        router.replace('/(auth)/onboarding');
       } else {
         router.replace('/(auth)/login');
       }

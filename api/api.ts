@@ -1,28 +1,13 @@
-import axios from 'axios'; 
-import { RegistrationData } from '@/lib/contexts/RegistrationContext';
-import { LoginFormData } from '@/lib/validation/authSchemas';
+import axios from 'axios';
+import { LoginFormData } from 'src/lib/validation/authSchemas';
+import { RegistrationData } from 'src/lib/contexts/RegistrationContext';
+import * as T from './types'
+
 
 export const apiClient = axios.create({
-      baseURL: 'https://mosprom.misis-team.ru',
-      headers: { 'Content-Type': 'application/json' },
-     }); 
-     
-export interface UserProfile {
-  email: string;
-  first_name: string;
-  last_name: string;
-  patronymic?: string;
-  description?: string;
-  contact?: string;
-  place_of_job?: string;
-  place_of_study?: string;
-  id: number;
-  created_at: string;
-  profile_photo?: string;
-  vk_avatar?: string;
-  skills: string[];
-  communities: string[];
-}
+  baseURL: 'https://mosprom.misis-team.ru',
+  headers: { 'Content-Type': 'application/json' },
+});
 
 
 const handleApiError = (error: any, customMessages: { [key: number]: string } = {}): string => {
@@ -38,41 +23,284 @@ const handleApiError = (error: any, customMessages: { [key: number]: string } = 
   return 'Произошла непредвиденная ошибка.';
 };
 
-export const getSkills = async (): Promise<string[]> => {
+
+
+
+
+
+// --------------------
+// --- Секция: users ---
+// --------------------
+
+// POST /users/register
+export const registerUser = async (userData: T.UserCreate): Promise<T.UserRead> => {
   try {
-    const response = await apiClient.get('/users/skills/all');
+    const response = await apiClient.post<T.UserRead>('/users/register', userData);
     return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+  } catch (error) { throw new Error(handleApiError(error)); }
 };
 
-export const registerUser = async (userData: RegistrationData): Promise<any> => {
+// POST /users/login
+export const loginUser = async (credentials: T.UserLogin): Promise<T.Token> => {
   try {
-    const response = await apiClient.post('/users/register', userData);
+    const response = await apiClient.post<T.Token>('/users/login', credentials);
     return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error, { 400: 'Пользователь с такой почтой уже существует.' }));
-  }
+  } catch (error) { throw new Error(handleApiError(error, { 401: 'Неверный email или пароль.' })); }
 };
 
-export const loginUser = async (credentials: LoginFormData): Promise<{ access_token: string }> => {
+// GET /users/me
+export const getCurrentUser = async (): Promise<T.UserRead> => {
   try {
-    const response = await apiClient.post('/users/login', credentials);
+    const response = await apiClient.get<T.UserRead>('/users/me');
     return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error, {
-      401: 'Неверный email или пароль.',
-      404: 'Пользователь с таким email не найден.',
-    }));
-  }
+  } catch (error) { throw new Error(handleApiError(error)); }
 };
 
-export const getCurrentUser = async (): Promise<UserProfile> => {
+// PUT /users/me
+export const updateCurrentUser = async (userData: T.UserUpdate): Promise<T.UserRead> => {
   try {
-    const response = await apiClient.get('/users/me');
+    const response = await apiClient.put<T.UserRead>('/users/me', userData);
     return response.data;
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// DELETE /users/me
+export const deleteCurrentUser = async (): Promise<void> => {
+  try {
+    await apiClient.delete('/users/me');
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// POST /users/me/change-password
+export const changePassword = async (passData: T.UserChangePassword): Promise<any> => {
+  try {
+    const response = await apiClient.post('/users/me/change-password', passData);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /users/me/skills
+export const getCurrentUserSkills = async (): Promise<string[]> => {
+  try {
+    const response = await apiClient.get<string[]>('/users/me/skills');
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// POST /users/me/skills
+export const addSkillToCurrentUser = async (skillName: string): Promise<any> => {
+  try {
+    const response = await apiClient.post('/users/me/skills', null, { params: { skill_name: skillName } });
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// DELETE /users/me/skills/{skill_name}
+export const removeSkillFromCurrentUser = async (skillName: string): Promise<any> => {
+  try {
+    const response = await apiClient.delete(`/users/me/skills/${skillName}`);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /users/skills/all
+export const getAllSkills = async (): Promise<string[]> => {
+  try {
+    const response = await apiClient.get<string[]>('/users/skills/all');
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /users/
+export const getUsers = async (skip: number = 0, limit: number = 100): Promise<T.UserRead[]> => {
+  try {
+    const response = await apiClient.get<T.UserRead[]>('/users/', { params: { skip, limit } });
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /users/{user_id}
+export const getUserById = async (userId: number): Promise<T.UserRead> => {
+  try {
+    const response = await apiClient.get<T.UserRead>(`/users/${userId}`);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// ---------------------------
+// --- Секция: communities ---
+// ---------------------------
+
+// POST /communities/
+export const createCommunity = async (communityData: T.CommunityCreate): Promise<T.CommunityRead> => {
+  try {
+    const response = await apiClient.post<T.CommunityRead>('/communities/', communityData);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /communities/
+export const getCommunities = async (skip: number = 0, limit: number = 100): Promise<T.CommunityRead[]> => {
+  try {
+    const response = await apiClient.get<T.CommunityRead[]>('/communities/', { params: { skip, limit } });
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /communities/my
+export const getMyCommunities = async (): Promise<T.CommunityRead[]> => {
+  try {
+    const response = await apiClient.get<T.CommunityRead[]>('/communities/my');
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /communities/{community_id}
+export const getCommunityById = async (communityId: number): Promise<T.CommunityRead> => {
+  try {
+    const response = await apiClient.get<T.CommunityRead>(`/communities/${communityId}`);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// PUT /communities/{community_id}
+export const updateCommunity = async (communityId: number, communityData: T.CommunityUpdate): Promise<T.CommunityRead> => {
+  try {
+    const response = await apiClient.put<T.CommunityRead>(`/communities/${communityId}`, communityData);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// DELETE /communities/{community_id}
+export const deleteCommunity = async (communityId: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/communities/${communityId}`);
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// POST /communities/{community_id}/join
+export const joinCommunity = async (communityId: number): Promise<any> => {
+  try {
+    const response = await apiClient.post(`/communities/${communityId}/join`);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// POST /communities/{community_id}/leave
+export const leaveCommunity = async (communityId: number): Promise<any> => {
+  try {
+    const response = await apiClient.post(`/communities/${communityId}/leave`);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// ---------------------
+// --- Секция: posts ---
+// ---------------------
+
+// POST /posts/
+export const createPost = async (postData: T.PostCreate): Promise<T.PostRead> => {
+  try {
+    const response = await apiClient.post<T.PostRead>('/posts/', postData);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /posts/
+export const getPosts = async (params: { skip?: number, limit?: number, community_id?: number } = {}): Promise<T.PostRead[]> => {
+  try {
+    const response = await apiClient.get<T.PostRead[]>('/posts/', { params });
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /posts/my
+export const getMyPosts = async (): Promise<T.PostRead[]> => {
+  try {
+    const response = await apiClient.get<T.PostRead[]>('/posts/my');
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /posts/{post_id}
+export const getPostById = async (postId: number): Promise<T.PostRead> => {
+  try {
+    const response = await apiClient.get<T.PostRead>(`/posts/${postId}`);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// PUT /posts/{post_id}
+export const updatePost = async (postId: number, postData: T.PostUpdate): Promise<T.PostRead> => {
+  try {
+    const response = await apiClient.put<T.PostRead>(`/posts/${postId}`, postData);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// DELETE /posts/{post_id}
+export const deletePost = async (postId: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/posts/${postId}`);
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// POST /posts/{post_id}/like
+export const likePost = async (postId: number): Promise<T.LikeResponse> => {
+  try {
+    const response = await apiClient.post<T.LikeResponse>(`/posts/${postId}/like`);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// POST /posts/{post_id}/unlike
+export const unlikePost = async (postId: number): Promise<T.LikeResponse> => {
+  try {
+    const response = await apiClient.post<T.LikeResponse>(`/posts/${postId}/unlike`);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+
+// -----------------------
+// --- Секция: comments ---
+// -----------------------
+
+// POST /comments/
+export const createComment = async (commentData: T.CommentCreate): Promise<T.CommentRead> => {
+  try {
+    const response = await apiClient.post<T.CommentRead>('/comments/', commentData);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /comments/post/{post_id}
+export const getPostComments = async (postId: number): Promise<T.CommentRead[]> => {
+  try {
+    const response = await apiClient.get<T.CommentRead[]>(`/comments/post/${postId}`);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// GET /comments/{comment_id}
+export const getCommentById = async (commentId: number): Promise<T.CommentRead> => {
+  try {
+    const response = await apiClient.get<T.CommentRead>(`/comments/${commentId}`);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// PUT /comments/{comment_id}
+export const updateComment = async (commentId: number, commentData: T.CommentUpdate): Promise<T.CommentRead> => {
+  try {
+    const response = await apiClient.put<T.CommentRead>(`/comments/${commentId}`, commentData);
+    return response.data;
+  } catch (error) { throw new Error(handleApiError(error)); }
+};
+
+// DELETE /comments/{comment_id}
+export const deleteComment = async (commentId: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/comments/${commentId}`);
+  } catch (error) { throw new Error(handleApiError(error)); }
 };
