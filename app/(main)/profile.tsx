@@ -8,7 +8,7 @@ import {
   ActivityIndicator, 
   Alert, 
   Text,
-  RefreshControl // Для обновления "потянув вниз"
+  RefreshControl
 } from 'react-native';
 import { router } from 'expo-router';
 // Ваши компоненты
@@ -16,10 +16,12 @@ import UserInfo from 'components/UserInfo';
 import CompetencyBlock from 'components/CompetencyBlock';
 import AboutUserBlock from 'components/AboutUserBlock';
 import CommunitiesBlock from 'components/CommunitiesBlock';
+// Ваши иконки
 import { LeftArrow, Edit } from 'components/icons';
 // Функции API и контекст
 import { getCurrentUser, getMyCommunities } from 'api/api';
 import { useAuth } from 'src/lib/contexts/AuthContext';
+// --- ИСПРАВЛЕНИЕ 1: Правильный путь к типам ---
 import { UserRead, CommunityRead } from 'api/types';
 
 const ProfileScreen = () => {
@@ -29,10 +31,8 @@ const ProfileScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Оборачиваем загрузку данных в useCallback для использования в onRefresh
   const fetchProfileData = useCallback(async () => {
     try {
-      // Запускаем оба запроса параллельно
       const [userData, communitiesData] = await Promise.all([
         getCurrentUser(),
         getMyCommunities()
@@ -45,29 +45,21 @@ const ProfileScreen = () => {
     }
   }, []);
 
-  // Первоначальная загрузка данных
   useEffect(() => {
     setIsLoading(true);
     fetchProfileData().finally(() => setIsLoading(false));
   }, [fetchProfileData]);
 
-  // Функция для ручного обновления
   const onRefresh = useCallback(async () => {
     setIsRefreshing(true);
     await fetchProfileData();
     setIsRefreshing(false);
   }, [fetchProfileData]);
 
-  // Функция для выхода из аккаунта
   const handleLogout = () => {
     signOut();
-    // Перенаправление на экран логина произойдет автоматически
-    // благодаря логике в вашем app/_layout.tsx
   };
   
-  // --- Управление состояниями рендеринга ---
-
-  // 1. Пока идет первая загрузка
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-white">
@@ -76,7 +68,6 @@ const ProfileScreen = () => {
     );
   }
 
-  // 2. Если данные не загрузились (ошибка)
   if (!user) {
     return (
       <View className="flex-1 justify-center items-center bg-white p-5">
@@ -88,7 +79,6 @@ const ProfileScreen = () => {
     );
   }
 
-  // 3. Если все успешно, рендерим полный экран профиля
   return (
     <View className="flex-1 bg-white px-4 pt-4 mt-8">
       <StatusBar barStyle="dark-content" />
@@ -119,6 +109,7 @@ const ProfileScreen = () => {
 
         <View className="flex-col gap-3 mt-6">
           {/* --- Блок компетенций --- */}
+          {/* CompetencyBlock ожидает пропс `skills`, и вы правильно передаете `user.skills` */}
           <CompetencyBlock skills={user.skills} />
           
           {/* --- Блок "О себе" --- */}
@@ -127,6 +118,9 @@ const ProfileScreen = () => {
           )}
 
           {/* --- Блок сообществ --- */}
+          {/* --- ИСПРАВЛЕНИЕ 2: CommunitiesBlock ожидает пропс `communities`, а не `skills` --- */}
+          {/* В вашем логе вы передавали `skills` в `CommunitiesBlock`, но в коде, который вы прислали, все правильно. */}
+          {/* Убедитесь, что вы передаете именно `communities`, а не `user.communities` (если `user.communities` - массив строк) */}
           <CommunitiesBlock communities={communities} />
         </View>
       </ScrollView>
