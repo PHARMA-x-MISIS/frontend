@@ -11,7 +11,7 @@ export default function Index() {
     // Небольшая задержка для красоты (опционально)
     setTimeout(() => {
       if (!isAuthenticated) {
-        router.replace('/(main)/chat');
+        router.replace('/(main)/store');
       } else {
         router.replace('/(auth)/register');
       }
