@@ -54,10 +54,20 @@ export default function CreateCommunityStep3Screen() {
           color: getRandomColor(),
         }));
         setAllCompetencies(formatted);
+        
+        // Автоматически выбираем три компетенции
+        const defaultSkills = ['devops', 'контейнеризация', 'фронтенд'];
+        const selectedDefaults = formatted
+          .filter(skill => defaultSkills.includes(skill.name.toLowerCase()))
+          .map(skill => skill.name);
+        
+        if (selectedDefaults.length > 0) {
+          setValue('competencies', selectedDefaults, { shouldValidate: true });
+        }
       })
       .catch(error => Alert.alert('Ошибка', 'Не удалось загрузить список компетенций.'))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [setValue]);
 
   const filteredCompetencies = useMemo(() => {
     if (!searchQuery.trim()) return allCompetencies;
@@ -114,14 +124,26 @@ export default function CreateCommunityStep3Screen() {
             <View style={styles.pillsContainer}>
               {filteredCompetencies.map(comp => {
                 const isSelected = selectedCompetencies.includes(comp.name);
+                // Определяем более тусклый цвет для каждой пилюли
+                const getPillColor = () => {
+                  switch (comp.color) {
+                    case 'orange': return '#FFE4CC';
+                    case 'blue': return '#D6DAFF';
+                    case 'yellow': return '#FFFACC';
+                    case 'green': return '#CCF5E8';
+                    case 'lightgreen': return '#DFFFEA';
+                    default: return '#E5E7EB';
+                  }
+                };
+                
                 return (
                   <TouchableOpacity
                     key={comp.id}
                     onPress={() => toggleCompetency(comp.name)}
                     activeOpacity={0.8}
-                    style={[styles.pill, isSelected && { backgroundColor: comp.color }]}
+                    style={[styles.pill, isSelected && { backgroundColor: getPillColor() }]}
                   >
-                    <Text style={[styles.pillText, isSelected && { color: 'black' }]}>
+                    <Text style={[styles.pillText, isSelected && { color: '#1F2937' }]}>
                       {comp.name}
                     </Text>
                   </TouchableOpacity>

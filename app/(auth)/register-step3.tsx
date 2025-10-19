@@ -48,8 +48,8 @@ export default function RegisterStep3Screen() {
       place_of_job: data.workPlace,
       description: data.aboutYou,
     });
-    // Переходим на следующий шаг
-    router.push('/(auth)/register-step4');
+    // Переходим на экран загрузки
+    router.push('/(auth)/register-step3-loading');
   };
 
   return (

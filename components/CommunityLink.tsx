@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 // --- Импортируем тип CommunityRead ---
 import { CommunityRead } from 'api/types';
+import { getImageUrl } from 'api/utils';
 
 // --- Компонент теперь принимает один пропс 'community' ---
 interface CommunityLinkProps {
@@ -16,6 +17,8 @@ const CommunityLink = ({ community }: CommunityLinkProps) => {
     router.push(`/main/community/${community.id}`);
   };
 
+  const avatarUrl = getImageUrl(community.avatar_url);
+
   return (
     <TouchableOpacity 
       style={styles.container}
@@ -24,7 +27,7 @@ const CommunityLink = ({ community }: CommunityLinkProps) => {
     >
       <Image 
         // Используем avatar_url, если он есть, иначе - заглушку
-        source={community.avatar_url ? { uri: community.avatar_url } : require('assets/images/avatar-placeholder.png')}
+        source={avatarUrl ? { uri: avatarUrl } : require('assets/images/avatar-placeholder.png')}
         style={styles.avatar}
       />
       <View style={styles.textContainer}>

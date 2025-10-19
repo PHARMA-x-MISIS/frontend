@@ -1,8 +1,7 @@
 import React from 'react';
-import { Pressable, Text, View, ActivityIndicator } from 'react-native';
+import { Pressable, Text, View, ActivityIndicator, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { Gosuslugi } from './icons';
 import { UilVk } from './icons';
 
 type SocialType = 'vk' | 'gos';
@@ -21,7 +20,7 @@ const SocialIcon = ({ type }: { type: SocialType }) => {
     return <UilVk className="mr-2" color="white" />;
   }
   if (type === 'gos') {
-    return <Gosuslugi />;
+    return <Image source={require('../assets/icons/gos.png')} style={{ width: 25, height: 25, marginRight: 8 }} />;
   }
   return null;
 };

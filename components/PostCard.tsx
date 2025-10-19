@@ -12,6 +12,7 @@ import {
 // Для иконок: npx expo install lucide-react-native
 import { Heart, MessageSquare, PlusCircle } from 'lucide-react-native';
 import { PostRead } from 'api/types';
+import { getImageUrl } from 'api/utils';
 
 // Тип для хранения унифицированной информации об авторе
 interface AuthorInfo {
@@ -44,7 +45,7 @@ const formatCount = (count: number): string => {
 };
 
 
-export default function PostCard({ post }: { post: PostRead }) {
+export default function PostCard({ post, hideSubscribeButton = false }: { post: PostRead; hideSubscribeButton?: boolean }) {
   // --- Состояния компонента ---
   const [isLiked, setIsLiked] = useState(post.is_liked);
   const [likeCount, setLikeCount] = useState(post.like_count);
@@ -59,8 +60,8 @@ export default function PostCard({ post }: { post: PostRead }) {
         .then(community => {
           setAuthorInfo({
             name: community.title,
-            avatarUrl: community.avatar_url,
-            details: `${community.skills.slice(0, 1).join(', ')}, ${community.member_count} подписчиков`,
+            avatarUrl: getImageUrl(community.avatar_url),
+            details: `${community.skills.slice(0, 1).join(', ')} · ${community.member_count} подписчиков`,
           });
         })
         .catch(() => setAuthorInfo({ name: 'Неизвестное сообщество', details: '' }));
@@ -70,7 +71,7 @@ export default function PostCard({ post }: { post: PostRead }) {
         .then(user => {
           setAuthorInfo({
             name: `${user.first_name} ${user.last_name}`,
-            avatarUrl: user.profile_photo,
+            avatarUrl: getImageUrl(user.profile_photo),
             details: formatDate(post.created_at),
           });
         })
@@ -137,7 +138,7 @@ export default function PostCard({ post }: { post: PostRead }) {
             <Text style={styles.authorName}>{authorInfo.name}</Text>
             <Text style={styles.authorDetails}>{authorInfo.details}</Text>
           </View>
-          {post.community_id && (
+          {post.community_id && !hideSubscribeButton && (
             <TouchableOpacity onPress={handleSubscribe} disabled={isSubscribing} style={styles.subscribeButton}>
               <PlusCircle size={28} color="#E94975" />
             </TouchableOpacity>
@@ -151,13 +152,13 @@ export default function PostCard({ post }: { post: PostRead }) {
       {/* --- Футер поста (лайки, комменты и кнопка) --- */}
       <View style={styles.footer}>
         <View style={styles.actions}>
-          <TouchableOpacity onPress={handleLike} style={styles.actionButton}>
+          <TouchableOpacity onPress={handleLike} style={styles.actionButton} activeOpacity={1}>
             <Heart size={22} color={isLiked ? '#E94975' : '#9CA3AF'} fill={isLiked ? '#E94975' : 'none'} />
             <Text style={[styles.actionText, isLiked && styles.actionTextLiked]}>
               {formatCount(likeCount)}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity style={styles.actionButton} activeOpacity={1}>
             <MessageSquare size={22} color="#9CA3AF" />
             <Text style={styles.actionText}>{formatCount(post.comment_count)}</Text>
           </TouchableOpacity>

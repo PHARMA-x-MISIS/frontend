@@ -23,6 +23,7 @@ import { getCurrentUser, getMyCommunities } from 'api/api';
 import { useAuth } from 'src/lib/contexts/AuthContext';
 // --- ИСПРАВЛЕНИЕ 1: Правильный путь к типам ---
 import { UserRead, CommunityRead } from 'api/types';
+import { getImageUrl } from 'api/utils';
 
 const ProfileScreen = () => {
   const { signOut } = useAuth();
@@ -102,7 +103,7 @@ const ProfileScreen = () => {
       >
         {/* --- User Info --- */}
         <UserInfo
-          avatarUrl={user.profile_photo ? { uri: user.profile_photo } : require('assets/images/avatar-placeholder.png')}
+          avatarUrl={getImageUrl(user.profile_photo) ? { uri: getImageUrl(user.profile_photo)! } : require('assets/images/avatar-placeholder.png')}
           firstName={user.first_name}
           lastName={user.last_name}
         />

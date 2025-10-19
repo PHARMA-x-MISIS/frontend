@@ -47,8 +47,8 @@ export default function CreateCommunityStep2Screen() {
   const onSubmit = (data: CreateCommunityStep2FormData) => {
     // 1. Сохраняем данные в контекст
     updateData({ website: data.website, targetAudience: data.targetAudience });
-    // 2. Переходим на следующий шаг по правильному пути
-    router.push('/(community)/create-step3');
+    // 2. Переходим на экран загрузки
+    router.push('/(community)/create-step2-loading');
   };
 
   return (

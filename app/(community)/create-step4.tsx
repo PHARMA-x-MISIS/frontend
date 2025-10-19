@@ -13,6 +13,7 @@ import { Lupa, Plus, CheckIcon } from 'components/icons';
 import { useCommunityCreation } from 'src/lib/contexts/CommunityContext';
 import { getUsers } from 'api/api';
 import { UserRead } from 'api/types';
+import { getImageUrl } from 'api/utils';
 
 // Тип для удобного рендеринга в списке
 interface UserForList {
@@ -52,8 +53,8 @@ export default function CreateCommunityStep4Screen() {
           id: String(user.id),
           name: `${user.first_name} ${user.last_name}`,
           description: user.email,
-          // Важно: преобразуем undefined/пустую строку в null
-          avatarUrl: user.profile_photo || null,
+          // Важно: преобразуем undefined/пустую строку в null и формируем полный URL
+          avatarUrl: getImageUrl(user.profile_photo),
         }));
         setAllUsers(formatted);
       })

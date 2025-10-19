@@ -35,6 +35,16 @@ export default function RegisterStep4Screen() {
           color: getRandomColor(),
         }));
         setAllCompetencies(formattedSkills);
+        
+        // Автоматически выбираем три компетенции
+        const defaultSkills = ['fastapi', 'сетевые технологии', 'бэкенд разработка'];
+        const selectedDefaults = formattedSkills
+          .filter(skill => defaultSkills.includes(skill.name.toLowerCase()))
+          .map(skill => skill.id);
+        
+        if (selectedDefaults.length > 0) {
+          setSelectedCompetencies(selectedDefaults);
+        }
       } catch (error) {
         console.error('Failed to fetch skills:', error);
       }

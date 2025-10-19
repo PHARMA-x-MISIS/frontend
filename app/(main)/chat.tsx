@@ -17,7 +17,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([
     { 
       id: 1, 
-      text: 'Привет! Я твой AI ассистент. Чем могу помочь?', 
+      text: 'Привет! Я Техноша, твой AI ассистент. Чем могу помочь?', 
       isUser: false, 
       timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) 
     }
@@ -87,7 +87,7 @@ export default function ChatScreen() {
           </TouchableOpacity>
           <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mr-3"><Text className="text-lg">🤖</Text></View>
           <View>
-            <Text style={{ fontFamily: 'Onest-SemiBold', fontSize: 16 }} className="text-gray-900">AI Ассистент</Text>
+            <Text style={{ fontFamily: 'Onest-SemiBold', fontSize: 16 }} className="text-gray-900">Техноша</Text>
             <Text style={{ fontFamily: 'Onest-Regular', fontSize: 12 }} className="text-gray-500">Онлайн</Text>
           </View>
         </View>

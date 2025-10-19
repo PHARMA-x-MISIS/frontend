@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Star, Store, PlusCircle } from 'lucide-react-native';
+import { Star, MessageCircle, PlusCircle } from 'lucide-react-native';
 import { LucideProps } from 'lucide-react-native'; // Импортируем тип для иконок
 
 
@@ -35,9 +35,9 @@ export default function ServicesScreen() {
           onPress={() => router.push('/(main)/recommendations')}
         />
         <ServiceButton 
-          title="Магазин сообщества"
-          icon={Store}
-          onPress={() => router.push('/(main)/store')}
+          title="Техноша"
+          icon={MessageCircle}
+          onPress={() => router.push('/(main)/chat')}
         />
         <ServiceButton 
           title="Создать сообщество"

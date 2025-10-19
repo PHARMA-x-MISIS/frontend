@@ -20,6 +20,7 @@ import { ArrowLeft, Check, Info, Gift } from 'lucide-react-native';
 // --- Компоненты ---
 import PostCard from 'components/PostCard';
 import { CommunityRead, PostRead } from 'api/types';
+import { getImageUrl } from 'api/utils';
 
 export default function CommunityProfileScreen() {
   // 1. Получаем `id` из URL, например, '12' из '/community/12'
@@ -88,7 +89,7 @@ export default function CommunityProfileScreen() {
     <>
       <View style={styles.infoContainer}>
         <Image 
-          source={community.avatar_url ? { uri: community.avatar_url } : require('assets/images/avatar-placeholder.png')}
+          source={getImageUrl(community.avatar_url) ? { uri: getImageUrl(community.avatar_url)! } : require('assets/images/avatar-placeholder.png')}
           style={styles.avatar}
         />
         <Text style={styles.title}>{community.title}</Text>
@@ -119,6 +120,8 @@ export default function CommunityProfileScreen() {
           <Text style={[styles.tabText, activeTab === 'events' && styles.activeTabText]}>События</Text>
         </TouchableOpacity>
       </View>
+      {/* Отступ перед постами */}
+      <View style={{ height: 12 }} />
     </>
   );
 
@@ -134,7 +137,7 @@ export default function CommunityProfileScreen() {
       {/* Используем FlatList, чтобы скроллилась вся страница */}
       <FlatList
         data={posts}
-        renderItem={({ item }) => <PostCard post={item} />}
+        renderItem={({ item }) => <PostCard post={item} hideSubscribeButton />}
         keyExtractor={item => item.id.toString()}
         ListHeaderComponent={ListHeaderComponent} // Вся информация - это шапка списка
         ListEmptyComponent={!isRefreshing ? ListEmptyComponent : null}
