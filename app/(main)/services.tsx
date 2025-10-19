@@ -4,7 +4,8 @@ import { View, Text, TextInput, Alert } from 'react-native';
 import { router } from 'expo-router';
 import Button from 'components/Button';
 // --- IMPORT THE NEW API FUNCTION AND TYPE ---
-import { createPost, PostCreate } from 'api/api';
+import { createPost} from 'api/api';
+import { PostCreate } from 'api/types';
 
 export default function CreatePostScreen() {
   const [text, setText] = useState('');

@@ -13,31 +13,26 @@ import { router } from 'expo-router';
 import Button from 'components/Button';
 // --- API ---
 import { createPost, getMyCommunities } from 'api/api';
-import { CommunityRead, PostCreate } from 'api/types';
-
+import { PostCreate, CommunityRead } from 'api/types';
 
 export default function CreatePostScreen() {
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Состояния для выбора "автора" поста
   const [myCommunities, setMyCommunities] = useState<CommunityRead[]>([]);
-  const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(null); // null = от своего имени
+  const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(null);
   const [isLoadingCommunities, setIsLoadingCommunities] = useState(true);
 
-  // --- Загрузка списка сообществ пользователя ---
   useEffect(() => {
     getMyCommunities()
       .then(setMyCommunities)
       .catch((error) => {
         console.error("Failed to fetch user's communities:", error);
-        // Не блокируем пользователя, если не удалось загрузить сообщества,
-        // он все еще может постить от своего имени.
       })
       .finally(() => setIsLoadingCommunities(false));
   }, []);
 
-  // --- Обработчик отправки формы ---
+  // --- ОБНОВЛЕННЫЙ ОБРАБОТЧИК ---
   const handleSubmit = async () => {
     if (!text.trim()) {
       Alert.alert('Ошибка', 'Текст поста не может быть пустым.');
@@ -45,18 +40,18 @@ export default function CreatePostScreen() {
     }
     setIsSubmitting(true);
     try {
-      // Собираем данные для отправки в API
+      // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
       const postData: PostCreate = {
         text,
-        // Если ID сообщества выбран (не null), добавляем его в объект
-        community_id: selectedCommunityId ?? undefined, 
+        // Теперь мы используем динамическое значение из состояния
+        community_id: selectedCommunityId ?? undefined,
       };
 
       const newPost = await createPost(postData);
       console.log('Пост создан:', newPost);
       
       Alert.alert('Успех!', 'Ваш пост успешно опубликован.');
-      router.back(); // Возвращаемся на предыдущий экран
+      router.back();
 
     } catch (error) {
       Alert.alert('Ошибка публикации', (error as Error).message);
@@ -67,12 +62,12 @@ export default function CreatePostScreen() {
 
   return (
     <View style={styles.container}>
-      {/* --- Шапка --- */}
+      {/* Шапка */}
       <View style={styles.header}>
         <Text style={styles.title}>Новый пост</Text>
       </View>
 
-      {/* --- Выбор автора (сообщества или личный) --- */}
+      {/* Выбор автора (сообщества или личный) */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Опубликовать от имени:</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -107,7 +102,7 @@ export default function CreatePostScreen() {
         </ScrollView>
       </View>
 
-      {/* --- Поле ввода текста --- */}
+      {/* Поле ввода текста */}
       <TextInput
         style={styles.textInput}
         placeholder="Что у вас нового?"
@@ -118,13 +113,13 @@ export default function CreatePostScreen() {
         textAlignVertical="top"
       />
 
-      {/* --- Кнопки действий --- */}
+      {/* Кнопки действий */}
       <View style={styles.footer}>
         <Button
           title={isSubmitting ? 'Публикация...' : 'Опубликовать'}
           onPress={handleSubmit}
           disabled={isSubmitting || !text.trim()}
-          outline={!text.trim()} // Кнопка контурная, пока нет текста
+          outline={!text.trim()}
         />
         <View style={{ height: 12 }} />
         <Button
