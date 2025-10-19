@@ -3,7 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient'; // 1. ИМПОРТИРУЕМ КОМПОНЕНТ ГРАДИЕНТА
+import { LinearGradient } from 'expo-linear-gradient';
+import { postChatMessage } from 'api/api';
 
 interface Message {
   id: number;
@@ -26,17 +27,43 @@ export default function ChatScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
 
   const sendMessage = async () => {
-    // ... логика отправки сообщения остается без изменений ...
     if (inputText.trim() === '' || isLoading) return;
-    const newMessage: Message = { id: Date.now(), text: inputText, isUser: true, timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) };
-    setMessages(prev => [...prev, newMessage]);
+
+    const userMessage: Message = { 
+      id: Date.now(), 
+      text: inputText, 
+      isUser: true, 
+      timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) 
+    };
+    setMessages(prev => [...prev, userMessage]);
+    
+    const messageToSend = inputText;
     setInputText('');
     setIsLoading(true);
-    setTimeout(() => {
-      const aiResponse: Message = { id: Date.now() + 1, text: 'Это моковый ответ, так как бэкенд не подключен.', isUser: false, timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) };
+
+    try {
+      const response = await postChatMessage(messageToSend);
+
+      const aiResponse: Message = {
+        id: Date.now() + 1,
+        text: response.reply, // Используем ответ из API
+        isUser: false,
+        timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+      };
       setMessages(prev => [...prev, aiResponse]);
+
+    } catch (error) {
+      console.error("Ошибка при получении ответа от AI:", error);
+      const errorResponse: Message = {
+        id: Date.now() + 1,
+        text: 'К сожалению, не удалось получить ответ. Попробуйте еще раз.',
+        isUser: false,
+        timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   useEffect(() => {
@@ -53,7 +80,7 @@ export default function ChatScreen() {
         className="flex-1"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
-        {/* Header без изменений */}
+        {/* Header */}
         <View className="bg-white border-b border-gray-200 px-4 py-4 flex-row items-center">
           <TouchableOpacity className="mr-3" onPress={() => router.back()}>
             <Text style={{ fontFamily: 'Onest-Regular', fontSize: 24 }} className="text-gray-700">←</Text>
@@ -70,7 +97,6 @@ export default function ChatScreen() {
           {messages.map((message) => (
             <View key={message.id} className={`mb-4 ${message.isUser ? 'items-end' : 'items-start'}`}>
               
-              {/* 2. ИЗМЕНЕНИЕ ЗДЕСЬ: используем LinearGradient вместо View для сообщений пользователя */}
               {message.isUser ? (
               <LinearGradient
                   colors={['#E5426B', '#E8A80A']}
@@ -101,7 +127,7 @@ export default function ChatScreen() {
               </Text>
             </View>
           ))}
-          {/* ... индикатор "Печатает..." без изменений ... */}
+          {/* Индикатор "Печатает..." */}
           {isLoading && <View className="items-start mb-4"><View className="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3"><Text style={{ fontFamily: 'Onest-Regular', fontSize: 15 }} className="text-gray-500">Печатает...</Text></View></View>}
         </ScrollView>
 
@@ -119,7 +145,6 @@ export default function ChatScreen() {
             />
             <TouchableOpacity 
               onPress={sendMessage}
-              // 3. ИЗМЕНЕНИЕ ЗДЕСЬ: меняем цвет кнопки
               className={`ml-2 w-9 h-9 rounded-full items-center justify-center ${
                 inputText.trim() && !isLoading ? 'bg-[#E5426B]' : 'bg-gray-300'
               }`}

@@ -1,15 +1,24 @@
 import axios from 'axios';
-import { LoginFormData } from 'src/lib/validation/authSchemas';
-import { RegistrationData } from 'src/lib/contexts/RegistrationContext';
-import * as T from './types'
+// Эти импорты могут быть не нужны, если типы T.* лежат в другом файле
+// import { LoginFormData } from 'src/lib/validation/authSchemas';
+// import { RegistrationData } from 'src/lib/contexts/RegistrationContext'; 
+import * as T from './types';
 
 
+// --- 1. КЛИЕНТ ДЛЯ ОСНОВНОГО API ---
 export const apiClient = axios.create({
-  baseURL: 'https://mosprom.misis-team.ru',
+  baseURL: 'https://mosprom.misis-team.ru', // Старый адрес для всего, кроме чата
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// --- 2. НОВЫЙ КЛИЕНТ СПЕЦИАЛЬНО ДЛЯ ЧАТА ---
+export const chatApiClient = axios.create({
+  baseURL: 'http://mosprom.misis-team.ru:8200', // Новый адрес для чата
   headers: { 'Content-Type': 'application/json' },
 });
 
 
+// Обработчик ошибок остается общим для всех
 const handleApiError = (error: any, customMessages: { [key: number]: string } = {}): string => {
   if (axios.isAxiosError(error) && error.response) {
     const status = error.response.status;
@@ -24,8 +33,33 @@ const handleApiError = (error: any, customMessages: { [key: number]: string } = 
 };
 
 
+// Тип для ответа чата
+export interface ChatResponse {
+  reply: string; 
+}
 
+// -----------------------
+// --- Секция: AI Chat ---
+// -----------------------
 
+// --- 3. ФУНКЦИЯ ЧАТА ТЕПЕРЬ ИСПОЛЬЗУЕТ chatApiClient ---
+export const postChatMessage = async (message: string): Promise<ChatResponse> => {
+  try {
+    const requestBody = {
+      message: message,
+      history: [],
+      temperature: 0.3,
+      max_tokens: 512,
+      top_p: 1
+    };
+    
+    // Используем новый клиент для запроса к чату
+    const response = await chatApiClient.post<ChatResponse>('/chat', requestBody);
+    return response.data;
+  } catch (error) {
+    throw new Error(handleApiError(error));
+  }
+};
 
 
 // --------------------
@@ -126,6 +160,11 @@ export const getUserById = async (userId: number): Promise<T.UserRead> => {
     return response.data;
   } catch (error) { throw new Error(handleApiError(error)); }
 };
+
+
+// --- Остальные секции (communities, posts, comments) остаются без изменений ---
+// Они все продолжают использовать `apiClient`
+
 
 // ---------------------------
 // --- Секция: communities ---
